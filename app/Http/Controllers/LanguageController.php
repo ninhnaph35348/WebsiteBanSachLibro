@@ -2,31 +2,31 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\Lanuage;
+use App\Models\Language;
 use Illuminate\Http\Request;
 
-class LanuageController extends Controller
+class LanguageController extends Controller
 {
     /**
      * Display a listing of the resource.
      */
     public function index()
     {
-        $lanuages = Lanuage::all();
-        return response()->json($lanuages);
+        $languages = Language::all();
+        return response()->json($languages);
     }
 
-    /**lanuage
+    /**language
      * Store a newly created resource in storage.
      */
     public function store(Request $request)
     {
 
-        $lanuage = Lanuage::create($request->only('name'));
+        $language = Language::create($request->only('name'));
 
         return response()->json([
             'message' => 'Thêm mới ngôn ngữ thành công',
-            'lanuage' => $lanuage
+            'language' => $language
         ]);
     }
 
@@ -35,15 +35,15 @@ class LanuageController extends Controller
      */
     public function show($id)
     {
-        $lanuage = Lanuage::find($id);
+        $language = Language::find($id);
 
-        // dd($lanuage);
+        // dd($language);
 
-        if (!$lanuage) {
+        if (!$language) {
             return response()->json(['message' => "Không tìm thấy ngôn ngữ"], 404);
         }
 
-        return response()->json($lanuage);
+        return response()->json($language);
     }
 
     /**
@@ -51,20 +51,20 @@ class LanuageController extends Controller
      */
     public function update(Request $request, $id)
     {
-        $lanuage = Lanuage::find($id);
+        $language = Language::find($id);
 
 
-        if (!$lanuage) {
+        if (!$language) {
             return response()->json(['message' => "Không tìm thấy ngôn ngữ"], 404);
         }
 
 
         // dd($request->all());
-        $lanuage->update($request->only('name'));
+        $language->update($request->only('name'));
 
         return response()->json([
             'message' => ' Cập nhật ngôn ngữ thành công',
-            'lanuage' => $lanuage
+            'language' => $language
         ]);
     }
 
@@ -73,14 +73,14 @@ class LanuageController extends Controller
      */
     public function destroy($id)
     {
-        $lanuage = Lanuage::find($id);
+        $language = Language::find($id);
 
 
-        if (!$lanuage) {
+        if (!$language) {
             return response()->json(['message' => "Không tìm thấy ngôn ngữ"], 404);
         }
 
-        $lanuage->delete();
+        $language->delete();
 
         return response()->json(['message' => 'Xóa ngôn ngữ thành công']);
     }

@@ -3,7 +3,7 @@
 use App\Http\Controllers\AuthorController;
 use App\Http\Controllers\CategoryController;
 use App\Http\Controllers\GenreController;
-use App\Http\Controllers\LanuageController;
+use App\Http\Controllers\LanguageController;
 use App\Http\Controllers\PublisherController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
@@ -26,6 +26,6 @@ use Illuminate\Support\Facades\Route;
 
 Route::apiResource('categories', CategoryController::class);
 Route::apiResource('authors', AuthorController::class);
-Route::apiResource('lanuages', LanuageController::class);
+Route::apiResource('languages', LanguageController::class);
 Route::apiResource('publishers', PublisherController::class);
 Route::apiResource('genres', GenreController::class);

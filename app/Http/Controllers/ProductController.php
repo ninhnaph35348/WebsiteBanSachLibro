@@ -7,6 +7,7 @@ use App\Models\Genre;
 use App\Models\Product;
 use App\Models\ProductGenre;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
 
 class ProductController extends Controller
@@ -43,6 +44,7 @@ class ProductController extends Controller
                 $imagePath = $request->file('image')->store('uploads', 'public');
                 $validatedData['image'] = $imagePath;
             }
+
 
             // Tạo sản phẩm
             $product = Product::create($validatedData);
@@ -93,58 +95,78 @@ class ProductController extends Controller
     /**
      * Update the specified resource in storage.
      */
-    public function update(Request $request, Product $product)
+    public function update(Request $request, $id)
     {
-        try {
-            // Validate dữ liệu
-            $validatedData = $request->validate([
-                'code' => 'required|string|max:50',
-                'title' => 'required|string|max:255',
-                'price' => 'required|numeric|min:0',
-                'promotion' => 'nullable|numeric|min:0',
-                'image' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
-                'quantity' => 'required|integer|min:0',
-                'supplier_name' => 'required|string|max:150',
-                'author_id' => 'required|exists:authors,id',
-                'publisher_id' => 'required|exists:publishers,id',
-                'description' => 'required|string',
-                'language_id' => 'required|exists:languages,id',
-                'category_id' => 'required|exists:categories,id',
-            ]);
+        // dd($request->file('image'), $request->file('images'));
+        $product = Product::find($id);
+        // echo '<pre>';
+        // print_r($request->all());die();
 
-            // Xử lý ảnh đại diện mới nếu có
+        if (!$product) {
+            return response()->json(['message' => "Không tìm thấy sản phẩm"], 404);
+        }
+        try {
+            DB::beginTransaction(); // Bắt đầu transaction để tránh lỗi dữ liệu không nhất quán
+
+            // ✅ Validate dữ liệu gửi lên
+            $validatedData = $request->validate([
+                'code' => 'sometimes|string|max:50',
+                'title' => 'sometimes|string|max:255',
+                'price' => 'sometimes|numeric|min:0',
+                'promotion' => 'nullable|numeric|min:0',
+                'image' => 'nullable',
+                'quantity' => 'sometimes|integer|min:0',
+                'supplier_name' => 'sometimes|string|max:150',
+                'author_id' => 'sometimes|exists:authors,id',
+                'publisher_id' => 'sometimes|exists:publishers,id',
+                'description' => 'sometimes',
+                'language_id' => 'sometimes|exists:languages,id',
+                'category_id' => 'sometimes|exists:categories,id',
+                'genres' => 'sometimes|array',
+                'genres.*' => 'exists:genres,id',
+                'images'
+            ]);
+            if ($product->image) {
+                Storage::disk('public')->delete($product->image);
+            }
+            foreach ($product->images as $image) {
+                Storage::disk('public')->delete($image->image_link); // Xóa file trong storage
+                $image->delete(); // Xóa record trong DB
+            }
+            // ✅ Xử lý ảnh đại diện (image)
             if ($request->hasFile('image')) {
-                // Xóa ảnh cũ nếu có
-                if ($product->image) {
-                    Storage::disk('public')->delete($product->image);
-                }
+
                 // Lưu ảnh mới
-                $imagePath = $request->file('image')->store('uploads', 'public');
-                $validatedData['image'] = $imagePath;
+                $validatedData['image'] = $request->file('image')->store('uploads', 'public');
+            }else{
+                $validatedData['image'] = null;
             }
 
-            // Cập nhật thông tin sản phẩm
+            // ✅ Cập nhật thông tin sản phẩm
             $product->update($validatedData);
 
-            // Cập nhật genres nếu có
+
+
+
+            // ✅ Cập nhật genres (nếu có gửi lên)
             if ($request->has('genres')) {
                 $product->genres()->sync($request->genres);
             }
 
-            // ✅ Cập nhật ảnh sản phẩm (nếu có)
+            // ✅ Xử lý nhiều ảnh (images)
             if ($request->hasFile('images')) {
-                // Xóa ảnh cũ
-                foreach ($product->images as $image) {
-                    Storage::disk('public')->delete($image->image_link);
-                    $image->delete();
-                }
 
-                // Lưu ảnh mới
+                // 🔥 Lưu ảnh mới
+                $imagePaths = [];
                 foreach ($request->file('images') as $imageFile) {
-                    $imagePath = $imageFile->store('uploads', 'public');
-                    $product->images()->create(['image_link' => $imagePath]);
+                    $imagePaths[] = ['image_link' => $imageFile->store('uploads', 'public')];
                 }
+                $product->images()->createMany($imagePaths);
+
+                // dd($imagePaths);
             }
+
+            DB::commit(); // Lưu thay đổi vào database
 
             return response()->json([
                 'message' => 'Cập nhật sản phẩm thành công',
@@ -152,13 +174,13 @@ class ProductController extends Controller
                 'image_url' => $product->image ? asset('storage/' . $product->image) : null,
             ], 200);
         } catch (\Exception $e) {
+            DB::rollBack(); // Hoàn tác nếu có lỗi xảy ra
             return response()->json([
                 'message' => 'Lỗi khi cập nhật sản phẩm',
                 'error' => $e->getMessage(),
             ], 500);
         }
     }
-
 
     /**
      * Remove the specified resource from storage.

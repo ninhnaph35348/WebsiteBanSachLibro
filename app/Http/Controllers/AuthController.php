@@ -8,6 +8,7 @@ use Illuminate\Support\Facades\Validator;
 
 class AuthController extends Controller
 {
+    // Đăng nhập
     public function login_(){
         return response()->json(['message' => 'Xin vui lòng đăng nhập'],401);
     }
@@ -47,9 +48,7 @@ class AuthController extends Controller
     }
     
 
-    /**
-     * Đăng xuất người dùng.
-     */
+    // Đăng xuất
     public function logout(Request $request)
 {
     if ($request->user()) {

@@ -26,12 +26,13 @@ use Illuminate\Support\Facades\Route;
 //     return $request->user();
 // });
 
-
+// Đăng nhâp đăng xuất
 Route::get('/login', [AuthController::class, 'login_'])->name('login');
 Route::post('/login', [AuthController::class, 'login']);
 Route::middleware(['auth:sanctum'])->group(function () {
     Route::post('/logout', [AuthController::class, 'logout']);
 });
+//
 Route::apiResource('categories', CategoryController::class);
 Route::apiResource('authors', AuthorController::class);
 Route::apiResource('languages', LanguageController::class);

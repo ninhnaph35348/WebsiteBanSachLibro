@@ -1,0 +1,41 @@
+<?php
+
+use App\Http\Controllers\AuthorController;
+use App\Http\Controllers\CategoryController;
+use App\Http\Controllers\GenreController;
+use App\Http\Controllers\LanguageController;
+use App\Http\Controllers\ProductController;
+use App\Http\Controllers\PublisherController;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\OrderController;
+
+/*
+|--------------------------------------------------------------------------
+| API Routes
+|--------------------------------------------------------------------------
+|
+| Here is where you can register API routes for your application. These
+| routes are loaded by the RouteServiceProvider and all of them will
+| be assigned to the "api" middleware group. Make something great!
+|
+*/
+
+// Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
+//     return $request->user();
+// });
+Route::prefix('orders')->group(function () {
+    Route::get('/', [OrderController::class, 'index']);       // Lấy danh sách đơn hàng
+    Route::get('/{id}', [OrderController::class, 'show']);    // Lấy chi tiết đơn hàng
+    Route::post('/', [OrderController::class, 'store']);      // Tạo đơn hàng
+    Route::put('/{id}', [OrderController::class, 'update']);  // Cập nhật đơn hàng
+    Route::delete('/{id}', [OrderController::class, 'destroy']); // Xóa đơn hàng
+});
+
+Route::apiResource('orders', OrderController::class);
+Route::apiResource('categories', CategoryController::class);
+Route::apiResource('authors', AuthorController::class);
+Route::apiResource('languages', LanguageController::class);
+Route::apiResource('publishers', PublisherController::class);
+Route::apiResource('genres', GenreController::class);
+Route::apiResource('products', ProductController::class);

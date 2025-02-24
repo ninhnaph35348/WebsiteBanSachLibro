@@ -1,13 +1,13 @@
 <?php
 
 use App\Http\Controllers\AuthController;
+use App\Http\Controllers\UserController;
 use App\Http\Controllers\AuthorController;
 use App\Http\Controllers\CategoryController;
 use App\Http\Controllers\GenreController;
 use App\Http\Controllers\LanguageController;
 use App\Http\Controllers\ProductController;
 use App\Http\Controllers\PublisherController;
-use App\Http\Controllers\UserController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
@@ -26,16 +26,18 @@ use Illuminate\Support\Facades\Route;
 //     return $request->user();
 // });
 
+
 // Đăng nhâp đăng xuất
 Route::get('/login', [AuthController::class, 'login_'])->name('login');
 Route::post('/login', [AuthController::class, 'login']);
 Route::middleware(['auth:sanctum'])->group(function () {
     Route::post('/logout', [AuthController::class, 'logout']);
 });
-//
+
 Route::apiResource('categories', CategoryController::class);
 Route::apiResource('authors', AuthorController::class);
 Route::apiResource('languages', LanguageController::class);
 Route::apiResource('publishers', PublisherController::class);
 Route::apiResource('genres', GenreController::class);
 Route::apiResource('products', ProductController::class);
+Route::apiResource('users', UserController::class);

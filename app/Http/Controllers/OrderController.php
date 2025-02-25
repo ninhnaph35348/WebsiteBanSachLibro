@@ -11,7 +11,7 @@ class OrderController extends Controller
     // Lấy danh sách đơn hàng
     public function index()
     {
-        return response()->json(Order::all(), Response::HTTP_OK);
+        return response()->json(Order::all());
     }
 
     // Lấy thông tin 1 đơn hàng
@@ -19,9 +19,9 @@ class OrderController extends Controller
     {
         $order = Order::find($id);
         if (!$order) {
-            return response()->json(['message' => 'Order not found'], Response::HTTP_NOT_FOUND);
+            return response()->json(['message' => 'Order not found']);
         }
-        return response()->json($order, Response::HTTP_OK);
+        return response()->json($order);
     }
 
     // Tạo mới đơn hàng

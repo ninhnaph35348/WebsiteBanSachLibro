@@ -31,7 +31,7 @@ Route::prefix('orders')->group(function () {
     Route::put('/{id}', [OrderController::class, 'update']);  // Cập nhật đơn hàng
     Route::delete('/{id}', [OrderController::class, 'destroy']); // Xóa đơn hàng
 });
-
+//
 Route::apiResource('orders', OrderController::class);
 Route::apiResource('categories', CategoryController::class);
 Route::apiResource('authors', AuthorController::class);

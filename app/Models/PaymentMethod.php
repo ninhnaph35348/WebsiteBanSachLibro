@@ -12,3 +12,4 @@ class PaymentMethod extends Model
     protected $table = 'payment_methods'; // Đúng tên bảng
     protected $fillable = ['name'];
 }
+//

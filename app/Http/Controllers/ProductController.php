@@ -130,7 +130,7 @@ class ProductController extends Controller
             if ($request->has('genres')) {
                 $product->genres()->sync($request->genres);
             }
-
+//x
             // ✅ Cập nhật ảnh sản phẩm (nếu có)
             if ($request->hasFile('images')) {
                 // Xóa ảnh cũ

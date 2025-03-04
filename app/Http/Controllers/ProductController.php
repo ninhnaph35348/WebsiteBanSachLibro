@@ -27,10 +27,7 @@ class ProductController extends Controller
             $validatedData = $request->validate([
                 'code' => 'required|string|max:50',
                 'title' => 'required|string|max:255',
-                'price' => 'required|numeric|min:0',
-                'promotion' => 'nullable|numeric|min:0',
                 'image' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
-                'quantity' => 'required|integer|min:0',
                 'supplier_name' => 'required|string|max:150',
                 'author_id' => 'required|exists:authors,id',
                 'publisher_id' => 'required|exists:publishers,id',
@@ -44,7 +41,6 @@ class ProductController extends Controller
                 $imagePath = $request->file('image')->store('uploads', 'public');
                 $validatedData['image'] = $imagePath;
             }
-
 
             // Tạo sản phẩm
             $product = Product::create($validatedData);
@@ -112,10 +108,7 @@ class ProductController extends Controller
             $validatedData = $request->validate([
                 'code' => 'sometimes|string|max:50',
                 'title' => 'sometimes|string|max:255',
-                'price' => 'sometimes|numeric|min:0',
-                'promotion' => 'nullable|numeric|min:0',
                 'image' => 'nullable',
-                'quantity' => 'sometimes|integer|min:0',
                 'supplier_name' => 'sometimes|string|max:150',
                 'author_id' => 'sometimes|exists:authors,id',
                 'publisher_id' => 'sometimes|exists:publishers,id',
@@ -167,24 +160,10 @@ class ProductController extends Controller
             }
 
             DB::commit(); // Lưu thay đổi vào database
-
-            return response()->json([
-                'message' => 'Cập nhật sản phẩm thành công',
-                'product' => new ProductResource($product->load('author', 'publisher', 'language', 'category', 'genres', 'images')),
-                'image_url' => $product->image ? asset('storage/' . $product->image) : null,
-            ], 200);
-        } catch (\Exception $e) {
-            DB::rollBack(); // Hoàn tác nếu có lỗi xảy ra
-            return response()->json([
-                'message' => 'Lỗi khi cập nhật sản phẩm',
-                'error' => $e->getMessage(),
-            ], 500);
         }
     }
 
-    /**
-     * Remove the specified resource from storage.
-     */
+   
     public function destroy($id)
     {
         $product = Product::find($id);

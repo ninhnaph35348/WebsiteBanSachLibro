@@ -10,6 +10,7 @@ use App\Http\Controllers\ProductController;
 use App\Http\Controllers\PublisherController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\OrderController;
 
 /*
 |--------------------------------------------------------------------------
@@ -34,6 +35,15 @@ Route::middleware(['auth:sanctum'])->group(function () {
     Route::post('/logout', [AuthController::class, 'logout']);
 });
 
+Route::prefix('orders')->group(function () {
+    Route::get('/', [OrderController::class, 'index']);       // Lấy danh sách đơn hàng
+    Route::get('/{id}', [OrderController::class, 'show']);    // Lấy chi tiết đơn hàng
+    Route::post('/', [OrderController::class, 'store']);      // Tạo đơn hàng
+    Route::put('/{id}', [OrderController::class, 'update']);  // Cập nhật đơn hàng
+    Route::delete('/{id}', [OrderController::class, 'destroy']); // Xóa đơn hàng
+});
+//
+Route::apiResource('orders', OrderController::class);
 Route::apiResource('categories', CategoryController::class);
 Route::apiResource('authors', AuthorController::class);
 Route::apiResource('languages', LanguageController::class);

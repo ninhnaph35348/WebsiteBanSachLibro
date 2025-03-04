@@ -42,6 +42,7 @@ class ProductController extends Controller
                 $validatedData['image'] = $imagePath;
             }
 
+
             // Tạo sản phẩm
             $product = Product::create($validatedData);
 
@@ -160,10 +161,24 @@ class ProductController extends Controller
             }
 
             DB::commit(); // Lưu thay đổi vào database
+
+            return response()->json([
+                'message' => 'Cập nhật sản phẩm thành công',
+                'product' => new ProductResource($product->load('author', 'publisher', 'language', 'category', 'genres', 'images')),
+                'image_url' => $product->image ? asset('storage/' . $product->image) : null,
+            ], 200);
+        } catch (\Exception $e) {
+            DB::rollBack(); // Hoàn tác nếu có lỗi xảy ra
+            return response()->json([
+                'message' => 'Lỗi khi cập nhật sản phẩm',
+                'error' => $e->getMessage(),
+            ], 500);
         }
     }
 
-   
+    /**
+     * Remove the specified resource from storage.
+     */
     public function destroy($id)
     {
         $product = Product::find($id);

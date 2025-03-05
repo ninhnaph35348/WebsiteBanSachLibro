@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\AuthController;
+use App\Http\Controllers\ProductVariantController;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\AuthorController;
 use App\Http\Controllers\CategoryController;
@@ -53,3 +54,4 @@ Route::apiResource('genres', GenreController::class);
 Route::apiResource('products', ProductController::class);
 Route::apiResource('users', UserController::class);
 Route::apiResource('vouchers', VoucherController::class);
+Route::apiResource('product_variants', ProductVariantController::class);

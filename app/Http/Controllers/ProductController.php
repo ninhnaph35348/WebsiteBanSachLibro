@@ -36,6 +36,9 @@ class ProductController extends Controller
                 'category_id' => 'required|exists:categories,id',
             ]);
 
+            if (Product::where('code', $request->code)->exists()) {
+                return response()->json(['message' => 'Mã sản phẩm đã tồn tại'], 400);
+            }
             // Xử lý ảnh đại diện (nếu có)
             if ($request->hasFile('image')) {
                 $imagePath = $request->file('image')->store('uploads', 'public');
@@ -107,7 +110,6 @@ class ProductController extends Controller
 
             // ✅ Validate dữ liệu gửi lên
             $validatedData = $request->validate([
-                'code' => 'sometimes|string|max:50',
                 'title' => 'sometimes|string|max:255',
                 'image' => 'nullable',
                 'supplier_name' => 'sometimes|string|max:150',

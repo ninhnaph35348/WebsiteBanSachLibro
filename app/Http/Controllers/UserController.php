@@ -40,73 +40,87 @@ class UserController extends Controller
     // Tạo user mới
     public function store(Request $request)
     {
-        $request->validate([
-            'username' => 'required|string|max:255',
-            'fullname' => 'required|string|max:255',
-            'email' => 'required',
-            'password' => 'required|string|min:6',
-            'phone' => 'string|max:20',
-            'address' => 'string',
-            'birth_date' => 'date',
-            'status' => 'required|string',
-            'role' => 'required|string',
-        ]);
-        if (User::where('username', $request->username)->exists()) {
-            return response()->json(['message' => 'Username đã tồn tại'], 400);
-        }
+        try {
+            $request->validate([
+                'username' => 'required|string|max:255',
+                'fullname' => 'required|string|max:255',
+                'email' => 'required',
+                'password' => 'required|string|min:6',
+                'phone' => 'string|max:20',
+                'address' => 'string',
+                'birth_date' => 'date',
+                'status' => 'required|string',
+                'role' => 'required|string',
+            ]);
+            if (User::where('username', $request->username)->exists()) {
+                return response()->json(['message' => 'Username đã tồn tại'], 400);
+            }
 
-        if (User::where('email', $request->email)->exists()) {
-            return response()->json(['message' => 'Email đã tồn tại'], 400);
-        }
-        $user = User::create($request->all());
+            if (User::where('email', $request->email)->exists()) {
+                return response()->json(['message' => 'Email đã tồn tại'], 400);
+            }
+            $user = User::create($request->all());
 
-        return response()->json([
-            'message' => 'Thêm mới thành công',
-            'user' => $user
-        ]);
+            return response()->json([
+                'message' => 'Thêm mới thành công',
+                'user' => $user
+            ]);
+        } catch (\Exception $e) {
+            return response()->json([
+                'message' => 'Lỗi khi tạo user',
+                'error' => $e->getMessage(),
+            ], 500);
+        }
     }
 
     // Cập nhật user
     public function update(Request $request, $id)
     {
-        $request->validate([
-            'username' => 'required|string|max:255',
-            'fullname' => 'required|string|max:255',
-            'email' => 'required',
-            'password' => 'required|string|min:6',
-            'phone' => 'string|max:20',
-            'address' => 'string',
-            'birth_date' => 'date',
-            'status' => 'required|string',
-            'role' => 'required|string',
-        ]);
+        try {
+            $request->validate([
+                'username' => 'required|string|max:255',
+                'fullname' => 'required|string|max:255',
+                'email' => 'required',
+                'password' => 'required|string|min:6',
+                'phone' => 'string|max:20',
+                'address' => 'string',
+                'birth_date' => 'date',
+                'status' => 'required|string',
+                'role' => 'required|string',
+            ]);
 
-        $user = User::find($id);
-        if (!$user) {
-            return response()->json(['message' => 'User không tồn tại'], 404);
-        }
-        // Kiểm tra username trùng nhưng bỏ qua user hiện tại
-        if (User::where('username', $request->username)->where('id', '!=', $id)->exists()) {
-            return response()->json(['message' => 'Username đã tồn tại'], 400);
-        }
+            $user = User::find($id);
+            if (!$user) {
+                return response()->json(['message' => 'User không tồn tại'], 404);
+            }
+            // Kiểm tra username trùng nhưng bỏ qua user hiện tại
+            if (User::where('username', $request->username)->where('id', '!=', $id)->exists()) {
+                return response()->json(['message' => 'Username đã tồn tại'], 400);
+            }
 
-        // Kiểm tra email trùng nhưng bỏ qua user hiện tại
-        if (User::where('email', $request->email)->where('id', '!=', $id)->exists()) {
-            return response()->json(['message' => 'Email đã tồn tại'], 400);
-        }
+            // Kiểm tra email trùng nhưng bỏ qua user hiện tại
+            if (User::where('email', $request->email)->where('id', '!=', $id)->exists()) {
+                return response()->json(['message' => 'Email đã tồn tại'], 400);
+            }
 
-        $user->update($request->all());
-        return response()->json([
-            'message' => 'Sửa thành công',
-            'user' => $user
-        ]);
+            $user->update($request->all());
+            return response()->json([
+                'message' => 'Sửa thành công',
+                'user' => $user
+            ]);
+        } catch (\Exception $e) {
+            return response()->json([
+                'message' => 'Lỗi khi sửa user',
+                'error' => $e->getMessage(),
+            ], 500);
+        }
     }
 
     // Xóa user
     public function destroy($id)
     {
         $user = User::find($id);
-
+        
         if (!$user) {
             return response()->json(['message' => 'User không tồn tại'], 404);
         }

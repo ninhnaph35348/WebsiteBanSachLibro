@@ -10,5 +10,5 @@ class Voucher extends Model
     use HasFactory;
 
     protected $table = 'vouchers'; // Đảm bảo đúng tên bảng
-    protected $fillable = ['code', 'discount', 'expiration_date']; // Thêm các cột cần thiết
+    protected $fillable = ['code', 'discount', 'valid_from', 'valid_to']; // Thêm các cột cần thiết
 }

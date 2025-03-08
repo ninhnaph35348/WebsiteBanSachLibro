@@ -10,6 +10,7 @@ use App\Http\Controllers\LanguageController;
 use App\Http\Controllers\ProductController;
 use App\Http\Controllers\PublisherController;
 use App\Http\Controllers\VoucherController;
+use App\Http\Controllers\ReviewController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\OrderController;
@@ -115,5 +116,14 @@ Route::prefix('product_variants')->group(function () {
     Route::post('/', [ProductVariantController::class, 'store']);
     Route::put('/edit/{id}', [ProductVariantController::class, 'update']);
     Route::put('/{id}', [ProductVariantController::class, 'destroy']);
+});
+
+
+Route::prefix('reviews')->group(function () {
+    Route::get('/', [ReviewController::class, 'index']);
+    Route::get('/{id}', [ReviewController::class, 'show']);
+    Route::post('/', [ReviewController::class, 'store']);
+    Route::put('/edit/{id}', [ReviewController::class, 'update']);
+    Route::put('/{id}', [ReviewController::class, 'destroy']);
 });
 

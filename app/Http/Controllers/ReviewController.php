@@ -13,7 +13,7 @@ class ReviewController extends Controller
         $reviews = Review::all();
         return response()->json($reviews, 200);
     }
-
+//
     // Lấy chi tiết một review
     public function show($id)
     {

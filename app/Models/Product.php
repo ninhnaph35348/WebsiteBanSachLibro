@@ -19,6 +19,7 @@ class Product extends Model
         'description',
         'language_id',
         'category_id',
+        'del_flg',
         'status'
     ];
 

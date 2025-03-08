@@ -41,7 +41,7 @@ Route::prefix('orders')->group(function () {
     Route::get('/', [OrderController::class, 'index']);
     Route::get('/{id}', [OrderController::class, 'show']);
     Route::post('/', [OrderController::class, 'store']);
-    Route::put('/{id}', [OrderController::class, 'update']);
+    Route::put('/edit/{id}', [OrderController::class, 'update']);
     Route::put('/{id}', [OrderController::class, 'destroy']);
 });
 
@@ -49,7 +49,7 @@ Route::prefix('categories')->group(function () {
     Route::get('/', [CategoryController::class, 'index']);
     Route::get('/{id}', [CategoryController::class, 'show']);
     Route::post('/', [CategoryController::class, 'store']);
-    Route::put('/{id}', [CategoryController::class, 'update']);
+    Route::put('/edit/{id}', [CategoryController::class, 'update']);
     Route::put('/{id}', [CategoryController::class, 'destroy']);
 });
 
@@ -57,7 +57,7 @@ Route::prefix('authors')->group(function () {
     Route::get('/', [AuthorController::class, 'index']);
     Route::get('/{id}', [AuthorController::class, 'show']);
     Route::post('/', [AuthorController::class, 'store']);
-    Route::put('/{id}', [AuthorController::class, 'update']);
+    Route::put('/edit/{id}', [AuthorController::class, 'update']);
     Route::put('/{id}', [AuthorController::class, 'destroy']);
 });
 
@@ -65,7 +65,7 @@ Route::prefix('languages')->group(function () {
     Route::get('/', [LanguageController::class, 'index']);
     Route::get('/{id}', [LanguageController::class, 'show']);
     Route::post('/', [LanguageController::class, 'store']);
-    Route::put('/{id}', [LanguageController::class, 'update']);
+    Route::put('/edit/{id}', [LanguageController::class, 'update']);
     Route::put('/{id}', [LanguageController::class, 'destroy']);
 });
 
@@ -73,7 +73,7 @@ Route::prefix('publishers')->group(function () {
     Route::get('/', [PublisherController::class, 'index']);
     Route::get('/{id}', [PublisherController::class, 'show']);
     Route::post('/', [PublisherController::class, 'store']);
-    Route::put('/{id}', [PublisherController::class, 'update']);
+    Route::put('/edit/{id}', [PublisherController::class, 'update']);
     Route::put('/{id}', [PublisherController::class, 'destroy']);
 });
 
@@ -81,7 +81,7 @@ Route::prefix('genres')->group(function () {
     Route::get('/', [GenreController::class, 'index']);
     Route::get('/{id}', [GenreController::class, 'show']);
     Route::post('/', [GenreController::class, 'store']);
-    Route::put('/{id}', [GenreController::class, 'update']);
+    Route::put('/edit/{id}', [GenreController::class, 'update']);
     Route::put('/{id}', [GenreController::class, 'destroy']);
 });
 
@@ -89,7 +89,7 @@ Route::prefix('products')->group(function () {
     Route::get('/', [ProductController::class, 'index']);
     Route::get('/{id}', [ProductController::class, 'show']);
     Route::post('/', [ProductController::class, 'store']);
-    Route::put('/{id}', [ProductController::class, 'update']);
+    Route::put('/edit/{id}', [ProductController::class, 'update']);
     Route::put('/{id}', [ProductController::class, 'destroy']);
 });
 
@@ -97,7 +97,7 @@ Route::prefix('users')->group(function () {
     Route::get('/', [UserController::class, 'index']);
     Route::get('/{id}', [UserController::class, 'show']);
     Route::post('/', [UserController::class, 'store']);
-    Route::put('/{id}', [UserController::class, 'update']);
+    Route::put('/edit/{id}', [UserController::class, 'update']);
     Route::put('/{id}', [UserController::class, 'destroy']);
 });
 
@@ -105,7 +105,7 @@ Route::prefix('vouchers')->group(function () {
     Route::get('/', [VoucherController::class, 'index']);
     Route::get('/{id}', [VoucherController::class, 'show']);
     Route::post('/', [VoucherController::class, 'store']);
-    Route::put('/{id}', [VoucherController::class, 'update']);
+    Route::put('/edit/{id}', [VoucherController::class, 'update']);
     Route::put('/{id}', [VoucherController::class, 'destroy']);
 });
 
@@ -113,7 +113,7 @@ Route::prefix('product_variants')->group(function () {
     Route::get('/', [ProductVariantController::class, 'index']);
     Route::get('/{id}', [ProductVariantController::class, 'show']);
     Route::post('/', [ProductVariantController::class, 'store']);
-    Route::put('/{id}', [ProductVariantController::class, 'update']);
+    Route::put('/edit/{id}', [ProductVariantController::class, 'update']);
     Route::put('/{id}', [ProductVariantController::class, 'destroy']);
 });
 

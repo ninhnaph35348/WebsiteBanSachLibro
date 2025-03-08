@@ -134,7 +134,7 @@ class ProductController extends Controller
 
                 // Lưu ảnh mới
                 $validatedData['image'] = $request->file('image')->store('uploads', 'public');
-            }else{
+            } else {
                 $validatedData['image'] = null;
             }
 
@@ -204,10 +204,10 @@ class ProductController extends Controller
             // Xóa quan hệ với genres (tránh rác trong bảng pivot)
             $product->genres()->detach();
 
-            // Xóa sản phẩm
-            $product->delete();
 
-            return response()->json(['message' => 'Xóa sản phẩm thành công'], 200);
+            $product->update(['del_flg' => 1]);
+
+            return response()->json(['message' => 'Sản phẩm đã bị ẩn'], 200);
         } catch (\Exception $e) {
             return response()->json([
                 'message' => 'Lỗi khi xóa sản phẩm',

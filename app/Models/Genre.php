@@ -10,6 +10,7 @@ class Genre extends Model
     use HasFactory;
     protected $fillable = [
         'name',
+        'del_flg',
     ];
 
     public function products()

@@ -14,5 +14,6 @@ class ProductVariant extends Model
         'product_id',
         'quantity',
         'price',
-        'promotion']; 
+        'promotion',
+        'del_flg',]; 
 }

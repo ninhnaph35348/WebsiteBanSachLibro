@@ -9,7 +9,8 @@ class GenreController extends Controller
 {
     public function index()
     {
-        $genres = Genre::all();
+        $genres = Genre::all()
+        ->where('del_flg', 0);
         return response()->json($genres);
     }
 
@@ -77,8 +78,10 @@ class GenreController extends Controller
             return response()->json(['message' => "Không tìm thấy tên thể loại sách"], 404);
         }
 
-        $genre->delete();
+        $genre->update(['del_flg' => 1]);
 
-        return response()->json(['message' => 'Xóa thể loại sách thành công']);
+        // $genre->delete();
+
+        return response()->json(['message' => 'Thể loại sách đã bị ẩn']);
     }
 }

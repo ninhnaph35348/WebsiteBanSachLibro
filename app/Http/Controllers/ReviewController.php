@@ -10,7 +10,7 @@ class ReviewController extends Controller
     // Lấy danh sách tất cả reviews
     public function index()
     {
-        $reviews = Review::all();
+        $reviews = Review::all()->where('del_flg', 0);
         return response()->json($reviews, 200);
     }
 
@@ -69,7 +69,8 @@ class ReviewController extends Controller
             return response()->json(['message' => 'Không tìm thấy đánh giá'], 404);
         }
 
-        $review->delete();
+        // $review->delete();
+        $review->update(['del_flg' => 1]);
 
         return response()->json(['message' => 'Đánh giá đã xóa thành công'], 200);
     }

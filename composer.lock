@@ -7838,7 +7838,7 @@
             "dist": {
                 "type": "zip",
                 "url": "https://api.github.com/repos/spatie/ignition/zipball/e3a68e137371e1eb9edc7f78ffa733f3b98991d2",
-                "reference": "e3a68e137371e1eb9edc7f78ffa733f3b98991d2",
+                "reference": "e3a68e137371e1eb9edc7f78ffa733f3b98991d2"
             },
             "require": {
                 "ext-json": "*",

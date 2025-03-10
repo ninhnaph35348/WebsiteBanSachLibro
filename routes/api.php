@@ -4,6 +4,7 @@ use App\Http\Controllers\AuthController;
 use App\Http\Controllers\ProductVariantController;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\AuthorController;
+use App\Http\Controllers\CartController;
 use App\Http\Controllers\CategoryController;
 use App\Http\Controllers\GenreController;
 use App\Http\Controllers\LanguageController;
@@ -41,9 +42,8 @@ Route::middleware(['auth:sanctum'])->group(function () {
 Route::prefix('orders')->group(function () {
     Route::get('/', [OrderController::class, 'index']);
     Route::get('/{id}', [OrderController::class, 'show']);
-    Route::post('/', [OrderController::class, 'store']);
+    // Route::post('/', [OrderController::class, 'store']);
     Route::put('/edit/{id}', [OrderController::class, 'update']);
-    Route::put('/{id}', [OrderController::class, 'destroy']);
 });
 
 Route::prefix('categories')->group(function () {
@@ -127,3 +127,4 @@ Route::prefix('reviews')->group(function () {
     Route::put('/{id}', [ReviewController::class, 'destroy']);
 });
 
+Route::post('carts/order/checkout', [CartController::class, 'checkout']);

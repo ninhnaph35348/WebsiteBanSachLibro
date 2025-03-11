@@ -9,6 +9,8 @@ class ProductGenre extends Model
 {
     use HasFactory;
 
+    protected $table = 'product_genre';
+
     protected $fillable = [
         'product_id',
         'genre_id'

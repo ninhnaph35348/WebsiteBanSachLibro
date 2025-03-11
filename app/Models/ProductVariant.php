@@ -8,6 +8,7 @@ use Illuminate\Database\Eloquent\Model;
 class ProductVariant extends Model
 {
     use HasFactory;
+    
 
     protected $table = 'product_variants';
     protected $fillable = [
@@ -15,5 +16,13 @@ class ProductVariant extends Model
         'quantity',
         'price',
         'promotion',
-        'del_flg',]; 
+        'del_flg', 
+        'promotion'
+        ];
+
+
+    public function product()
+    {
+        return $this->belongsTo(Product::class, 'product_id', 'id');
+    }
 }

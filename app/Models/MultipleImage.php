@@ -9,6 +9,8 @@ class MultipleImage extends Model
 {
     use HasFactory;
 
+    protected $table = 'multiple_images';
+
     protected $fillable = ['image_link', 'product_id'];
 
     public function product()

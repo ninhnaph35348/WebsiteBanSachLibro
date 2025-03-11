@@ -32,7 +32,7 @@ class ProductVariantController extends Controller
 
         return response()->json([
             'message' => 'Thêm mới thành công',
-            'voucher' => $variant
+            'variant' => $variant
         ]);
     }
 
@@ -69,7 +69,7 @@ class ProductVariantController extends Controller
 
         return response()->json([
             'message' => 'Sửa thành công',
-            'voucher' => $variant
+            'variant' => $variant
         ]);
     }
 

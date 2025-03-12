@@ -13,7 +13,7 @@ class VoucherController extends Controller
      */
     public function index()
     {
-        $vouchers = Voucher::all();
+        $vouchers = Voucher::all()->where('del_flg', 0);
         return response()->json($vouchers);
     }
 
@@ -84,7 +84,9 @@ class VoucherController extends Controller
             return response()->json(['message' => 'Voucher không tồn tại'], 404);
         }
 
-        $voucher->delete();
+        // $voucher->delete();
+        $voucher->update(['del_flg' => 1]);
+        
         return response()->json(['message' => 'Voucher đã được xóa thành công']);
     }
 }

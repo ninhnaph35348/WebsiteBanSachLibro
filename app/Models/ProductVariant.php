@@ -15,9 +15,11 @@ class ProductVariant extends Model
         'product_id',
         'quantity',
         'price',
+        'promotion',
+        'del_flg', 
         'cover_id',
         'promotion'
-    ];
+        ];
 
     public function cover()
     {

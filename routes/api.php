@@ -132,3 +132,4 @@ Route::prefix('reviews')->group(function () {
 });
 
 Route::post('carts/order/checkout', [CartController::class, 'checkout']);
+

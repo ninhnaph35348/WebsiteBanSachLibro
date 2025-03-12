@@ -45,6 +45,7 @@ class UserController extends Controller
                 'username' => 'required|string|max:255',
                 'fullname' => 'required|string|max:255',
                 'email' => 'required',
+                'avatar' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
                 'password' => 'required|string|min:6',
                 'phone' => 'string|max:20',
                 'address' => 'string',
@@ -81,6 +82,7 @@ class UserController extends Controller
                 'username' => 'required|string|max:255',
                 'fullname' => 'required|string|max:255',
                 'email' => 'required',
+                'avatar' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
                 'password' => 'required|string|min:6',
                 'phone' => 'string|max:20',
                 'address' => 'string',
@@ -120,7 +122,7 @@ class UserController extends Controller
     public function destroy($id)
     {
         $user = User::find($id);
-        
+
         if (!$user) {
             return response()->json(['message' => 'User không tồn tại'], 404);
         }

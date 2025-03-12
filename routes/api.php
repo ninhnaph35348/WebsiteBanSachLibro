@@ -95,7 +95,6 @@ Route::prefix('products')->group(function () {
     Route::post('/', [ProductController::class, 'store']);
     Route::put('/edit/{id}', [ProductController::class, 'update']);
     Route::put('/{id}', [ProductController::class, 'destroy']);
-    
 });
 
 Route::prefix('users')->group(function () {
@@ -128,7 +127,8 @@ Route::prefix('reviews')->group(function () {
     Route::get('/{id}', [ReviewController::class, 'show']);
     Route::post('/', [ReviewController::class, 'store']);
     Route::put('/edit/{id}', [ReviewController::class, 'update']);
-    Route::put('/{id}', [ReviewController::class, 'destroy']);
+    Route::delete('/{id}', [ReviewController::class, 'destroy']);
+    Route::put('/{id}', [ReviewController::class, 'hidden']);
 });
 
 Route::post('carts/order/checkout', [CartController::class, 'checkout']);

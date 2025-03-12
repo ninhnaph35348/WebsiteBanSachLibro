@@ -23,6 +23,7 @@ class ProductVariantController extends Controller
     {
         $request->validate([
             'product_id' => 'required',
+            'cover_id' => 'required',
             'quantity' => 'required|integer|min:0',
             'price' => 'required|min:0',
             'promotion' => 'nullable|min:0',
@@ -60,6 +61,7 @@ class ProductVariantController extends Controller
 
         $request->validate([
             'product_id' => 'required',
+            'cover_id' => 'required',
             'quantity' => 'required|integer|min:0',
             'price' => 'required|min:0',
             'promotion' => 'nullable|min:0',

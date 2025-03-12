@@ -13,6 +13,7 @@ class Author extends Model
 
     protected $fillable = [
         'name',
+        'del_flg'
     ];
 
     public function products()

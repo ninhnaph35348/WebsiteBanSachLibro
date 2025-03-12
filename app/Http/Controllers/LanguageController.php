@@ -12,9 +12,10 @@ class LanguageController extends Controller
      */
     public function index()
     {
-        $languages = Language::all();
-        return response()->json($languages);
+        $language = Language::where('del_flg', 0)->get(); 
+        return response()->json($language, 200);
     }
+    
 
     /**language
      * Store a newly created resource in storage.
@@ -74,14 +75,14 @@ class LanguageController extends Controller
     public function destroy($id)
     {
         $language = Language::find($id);
-
-
+    
         if (!$language) {
-            return response()->json(['message' => "Không tìm thấy ngôn ngữ"], 404);
+            return response()->json(['message' => 'Không tìm thấy ngôn ngữ'], 404);
         }
-
-        $language->delete();
-
-        return response()->json(['message' => 'Xóa ngôn ngữ thành công']);
+    
+        $language->update(['del_flg' => 1]); // Xóa mềm bằng cách đặt del_flg = 1
+    
+        return response()->json(['message' => 'Ngôn ngữ đã bị ẩn'], 200);
     }
+    
 }

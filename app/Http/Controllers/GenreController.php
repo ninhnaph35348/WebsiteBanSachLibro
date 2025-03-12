@@ -9,9 +9,10 @@ class GenreController extends Controller
 {
     public function index()
     {
-        $genres = Genre::all();
-        return response()->json($genres);
+        $genre = Genre::where('del_flg', 0)->get(); 
+        return response()->json($genre, 200);
     }
+    
 
     /**genre
      * Store a newly created resource in storage.
@@ -71,14 +72,14 @@ class GenreController extends Controller
     public function destroy($id)
     {
         $genre = Genre::find($id);
-
-
+    
         if (!$genre) {
-            return response()->json(['message' => "Không tìm thấy tên thể loại sách"], 404);
+            return response()->json(['message' => 'Không tìm thấy thể loại'], 404);
         }
-
-        $genre->delete();
-
-        return response()->json(['message' => 'Xóa thể loại sách thành công']);
+    
+        $genre->update(['del_flg' => 1]);
+    
+        return response()->json(['message' => 'Thể loại đã bị ẩn'], 200);
     }
+    
 }

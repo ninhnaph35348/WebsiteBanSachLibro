@@ -24,6 +24,21 @@ class ProductController extends Controller
         return ProductResource::collection($products);
     }
 
+    public function product_filtering($category_id = null)
+    {
+        $query = Product::with('author', 'publisher', 'language', 'category', 'genres', 'images')
+            ->where('del_flg', 0);
+
+        if ($category_id) {
+            $query->where('category_id', $category_id);
+        }
+
+        $products = $query->get();
+
+        return ProductResource::collection($products);
+    }
+
+
     public function store(Request $request)
     {
         try {

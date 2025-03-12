@@ -4,21 +4,20 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\SoftDeletes;
 
-class Author extends Model
+class Cover extends Model
 {
     use HasFactory;
 
-    protected $table = 'authors';
-
+    protected $table = 'covers';
     protected $fillable = [
         'name',
         'del_flg'
     ];
- 
-    public function products()
+
+
+    public function productVariants()
     {
-        return $this->hasMany(Product::class);
+        return $this->hasMany(ProductVariant::class, 'cover_id');
     }
 }

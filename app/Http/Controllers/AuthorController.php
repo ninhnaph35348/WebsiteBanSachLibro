@@ -11,12 +11,11 @@ class AuthorController extends Controller
      * Display a listing of the resource.
      */
     public function index()
-{
-    $author = Author::where('del_flg', 0)->get();
-    return response()->json($author, 200);
+    {
+        $authors = Author::where('del_flg', 0)->get();
 
-}
-
+        return response()->json($authors);
+    }
 
 
     /**Author
@@ -79,15 +78,15 @@ class AuthorController extends Controller
     public function destroy($id)
     {
         $author = Author::find($id);
-    
+
+
         if (!$author) {
             return response()->json(['message' => "Không tìm thấy tên tác giả"], 404);
         }
-    
-        // Xóa mềm: cập nhật del_flg = 1
+
         $author->update(['del_flg' => 1]);
-    
-        return response()->json(['message' => 'Tác giả đã bị ẩn'], 200);
+
+        return response()->json(['message' => 'Sản phẩm đã bị ẩn'], 200);
     }
     
     

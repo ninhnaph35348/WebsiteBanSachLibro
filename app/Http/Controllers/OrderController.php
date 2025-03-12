@@ -3,8 +3,13 @@
 namespace App\Http\Controllers;
 
 use App\Models\Order;
+use App\Models\Product;
+use App\Models\ProductVariant;
+use App\Models\Voucher;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Str;
 
 class OrderController extends Controller
 {
@@ -19,65 +24,41 @@ class OrderController extends Controller
     {
         $order = Order::find($id);
         if (!$order) {
-            return response()->json(['message' => 'Order not found']);
+            return response()->json(['message' => 'Không tìm thấy đơn hàng'], 404);
         }
         return response()->json($order);
     }
 
-    // Tạo mới đơn hàng
-    public function store(Request $request)
-{
-    $request->validate([
-        'code_order' => 'required|string|unique:orders',
-        'total_price' => 'required|numeric',
-        'note' => 'nullable|string',
-        'order_status_id' => 'required|integer',
-        'payment_id' => 'required|integer',
-        'voucher_id' => 'nullable|integer',
-        'user_id' => 'required|integer',
-    ]);
-
-    $order = Order::create($request->all());
-
-    return response()->json([
-        'message' => 'Đơn hàng đã được tạo thành công!',
-        'data' => $order
-    ], 201);
-}
-
 
     // Cập nhật đơn hàng
+
+
     public function update(Request $request, $id)
     {
         $order = Order::find($id);
         if (!$order) {
-            return response()->json(['message' => 'Order not found']);
+            return response()->json(['message' => 'Không tìm thấy đơn hàng'], 404);
         }
 
-        $validated = $request->validate([
-            'code_order' => 'sometimes|required|string|max:50',
-            'total_price' => 'sometimes|required|numeric',
-            'note' => 'sometimes|required|string',
-            'order_status_id' => 'sometimes|required|exists:order_statuses,id',
-            'payment_id' => 'sometimes|required|exists:payment_methods,id',
-            'voucher_id' => 'nullable|exists:vouchers,id',
-            'user_id' => 'sometimes|required|exists:users,id',
+        // Nếu trạng thái đơn hàng đã là 6, 7, hoặc 8 thì không thể cập nhật nữa
+        if (in_array($order->order_status_id, [6, 7, 8])) {
+            return response()->json(['message' => 'Không thể thay đổi trạng thái đơn hàng này'], 400);
+        }
+
+        if ($request['order_status_id'] <= $order->order_status_id) {
+            return response()->json(['message' => 'Không thể thay đổi trạng thái trước đó'], 400);
+        }
+
+        if($order->order_status_id >=3 && $request['order_status_id'] == 7){
+            return response()->json(['message' => 'Không thể hủy nếu đơn hàng đã đang chuẩn bị hàng trở lên'], 400);
+        }
+
+        $order->update(['order_status_id' => $request['order_status_id']]);
+
+        return response()->json([
+            'message' => 'Cập nhật trạng thái đơn hàng thành công',
+            'data' => $order
         ]);
-
-        $order->update($validated);
-        return response()->json(['mer' =>'Sửa thành công ',
-        'dâ'=> $order]);
     }
 
-    // Xóa đơn hàng
-    public function destroy($id)
-    {
-        $order = Order::find($id);
-        if (!$order) {
-            return response()->json(['message' => 'Order not found'], Response::HTTP_NOT_FOUND);
-        }
-
-        $order->delete();
-        return response()->json(['message' => 'Order deleted'], Response::HTTP_OK);
-    }
 }

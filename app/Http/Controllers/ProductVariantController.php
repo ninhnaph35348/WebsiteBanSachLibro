@@ -12,7 +12,7 @@ class ProductVariantController extends Controller
      */
     public function index()
     {
-        $products = ProductVariant::all();
+        $products = ProductVariant::all()->where('del_flg', 0);
         return response()->json($products);
     }
 
@@ -23,6 +23,7 @@ class ProductVariantController extends Controller
     {
         $request->validate([
             'product_id' => 'required',
+            'cover_id' => 'required',
             'quantity' => 'required|integer|min:0',
             'price' => 'required|min:0',
             'promotion' => 'nullable|min:0',
@@ -32,7 +33,7 @@ class ProductVariantController extends Controller
 
         return response()->json([
             'message' => 'Thêm mới thành công',
-            'voucher' => $variant
+            'variant' => $variant
         ]);
     }
 
@@ -60,6 +61,7 @@ class ProductVariantController extends Controller
 
         $request->validate([
             'product_id' => 'required',
+            'cover_id' => 'required',
             'quantity' => 'required|integer|min:0',
             'price' => 'required|min:0',
             'promotion' => 'nullable|min:0',
@@ -69,7 +71,7 @@ class ProductVariantController extends Controller
 
         return response()->json([
             'message' => 'Sửa thành công',
-            'voucher' => $variant
+            'variant' => $variant
         ]);
     }
 
@@ -83,7 +85,9 @@ class ProductVariantController extends Controller
             return response()->json(['message' => 'Không tồn tại'], 404);
         }
 
-        $variant->delete();
-        return response()->json(['message' => 'Xóa thành công']);
+        // $variant->delete();
+        $variant->update(['del_flg' => 1]);
+
+        return response()->json(['message' => 'Ẩn thành công']);
     }
 }

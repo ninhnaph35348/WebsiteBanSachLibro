@@ -4,6 +4,7 @@ use App\Http\Controllers\AuthController;
 use App\Http\Controllers\ProductVariantController;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\AuthorController;
+use App\Http\Controllers\CartController;
 use App\Http\Controllers\CategoryController;
 use App\Http\Controllers\GenreController;
 use App\Http\Controllers\LanguageController;
@@ -41,9 +42,8 @@ Route::middleware(['auth:sanctum'])->group(function () {
 Route::prefix('orders')->group(function () {
     Route::get('/', [OrderController::class, 'index']);
     Route::get('/{id}', [OrderController::class, 'show']);
-    Route::post('/', [OrderController::class, 'store']);
+    // Route::post('/', [OrderController::class, 'store']);
     Route::put('/edit/{id}', [OrderController::class, 'update']);
-    Route::put('/{id}', [OrderController::class, 'destroy']);
 });
 
 Route::prefix('categories')->group(function () {
@@ -88,6 +88,9 @@ Route::prefix('genres')->group(function () {
 
 Route::prefix('products')->group(function () {
     Route::get('/', [ProductController::class, 'index']);
+    Route::get('/latest', [ProductController::class, 'latest']);
+    Route::get('/search', [ProductController::class, 'search']);
+    Route::get('/filter', [ProductController::class, 'product_filtering']);
     Route::get('/{id}', [ProductController::class, 'show']);
     Route::post('/', [ProductController::class, 'store']);
     Route::put('/edit/{id}', [ProductController::class, 'update']);
@@ -124,7 +127,9 @@ Route::prefix('reviews')->group(function () {
     Route::get('/{id}', [ReviewController::class, 'show']);
     Route::post('/', [ReviewController::class, 'store']);
     Route::put('/edit/{id}', [ReviewController::class, 'update']);
-    Route::put('/{id}', [ReviewController::class, 'destroy']);
+    Route::delete('/{id}', [ReviewController::class, 'destroy']);
+    Route::put('/{id}', [ReviewController::class, 'hidden']);
 });
 
-//
+Route::post('carts/order/checkout', [CartController::class, 'checkout']);
+

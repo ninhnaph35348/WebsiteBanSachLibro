@@ -9,10 +9,25 @@ class ProductVariant extends Model
 {
     use HasFactory;
 
+
     protected $table = 'product_variants';
     protected $fillable = [
         'product_id',
         'quantity',
         'price',
-        'promotion']; 
+        'promotion',
+        'del_flg', 
+        'cover_id',
+        'promotion'
+        ];
+
+    public function cover()
+    {
+        return $this->belongsTo(Cover::class, 'cover_id');
+    }
+    
+    public function product()
+    {
+        return $this->belongsTo(Product::class, 'product_id', 'id');
+    }
 }

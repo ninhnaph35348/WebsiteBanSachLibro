@@ -88,7 +88,7 @@ Route::prefix('genres')->group(function () {
 
 Route::prefix('products')->group(function () {
     Route::get('/', [ProductController::class, 'index']);
-    Route::get('/category/{category_id}', [ProductController::class, 'product_filtering']);
+    Route::get('/filter', [ProductController::class, 'product_filtering']);
     Route::get('/{id}', [ProductController::class, 'show']);
     Route::post('/', [ProductController::class, 'store']);
     Route::put('/edit/{id}', [ProductController::class, 'update']);

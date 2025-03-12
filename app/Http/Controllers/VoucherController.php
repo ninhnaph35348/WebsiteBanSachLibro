@@ -22,19 +22,23 @@ class VoucherController extends Controller
      */
     public function store(Request $request)
     {
-        $request->validate([
-            'code' => 'required|string|unique:vouchers,code|max:50',
-            'discount' => 'required|numeric|min:0|max:100',
-            'valid_from' => 'required|date',
-            'valid_to' => 'required|date|after_or_equal:valid_from',
-        ]);
+        try {
+            $request->validate([
+                'code' => 'required|string|unique:vouchers,code|max:50',
+                'discount' => 'required|numeric',
+                'valid_from' => 'required|date',
+                'valid_to' => 'required|date|after_or_equal:valid_from',
+            ]);
 
-        $voucher = Voucher::create($request->all());
+            $voucher = Voucher::create($request->all());
 
-        return response()->json([
-            'message' => 'Thêm mới voucher thành công',
-            'voucher' => $voucher
-        ]);
+            return response()->json([
+                'message' => 'Thêm mới voucher thành công',
+                'voucher' => $voucher
+            ]);
+        } catch (\Exception $e) {
+            return response()->json(['message' => $e->getMessage()], 500);
+        }
     }
 
     /**
@@ -54,24 +58,28 @@ class VoucherController extends Controller
      */
     public function update(Request $request, string $id)
     {
-        $voucher = Voucher::find($id);
-        if (!$voucher) {
-            return response()->json(['message' => 'Voucher không tồn tại'], 404);
+        try {
+            $voucher = Voucher::find($id);
+            if (!$voucher) {
+                return response()->json(['message' => 'Voucher không tồn tại'], 404);
+            }
+
+            $request->validate([
+                'code' => 'string|unique:vouchers,code|max:50',
+                'discount' => 'numeric',
+                'valid_from' => 'date',
+                'valid_to' => 'date|after_or_equal:valid_from',
+            ]);
+
+            $voucher->update($request->all());
+
+            return response()->json([
+                'message' => 'Cập nhật voucher thành công',
+                'voucher' => $voucher
+            ]);
+        } catch (\Exception $e) {
+            return response()->json(['message' => $e->getMessage()], 500);
         }
-
-        $request->validate([
-            'code' => 'string|unique:vouchers,code,' . $id . '|max:50',
-            'discount' => 'numeric|min:0|max:100',
-            'valid_from' => 'date',
-            'valid_to' => 'date|after_or_equal:valid_from',
-        ]);
-
-        $voucher->update($request->all());
-
-        return response()->json([
-            'message' => 'Cập nhật voucher thành công',
-            'voucher' => $voucher
-        ]);
     }
 
     /**
@@ -86,7 +94,7 @@ class VoucherController extends Controller
 
         // $voucher->delete();
         $voucher->update(['del_flg' => 1]);
-        
+
         return response()->json(['message' => 'Voucher đã được xóa thành công']);
     }
 }

@@ -35,13 +35,13 @@ Route::middleware(['auth:sanctum'])->group(function () {
     Route::post('/logout', [AuthController::class, 'logout']);
 });
 
-Route::prefix('orders')->group(function () {
-    Route::get('/', [OrderController::class, 'index']);       // Lấy danh sách đơn hàng
-    Route::get('/{id}', [OrderController::class, 'show']);    // Lấy chi tiết đơn hàng
-    Route::post('/', [OrderController::class, 'store']);      // Tạo đơn hàng
-    Route::put('/{id}', [OrderController::class, 'update']);  // Cập nhật đơn hàng
-    Route::delete('/{id}', [OrderController::class, 'destroy']); // Xóa đơn hàng
-});
+// Route::prefix('orders')->group(function () {
+//     Route::get('/', [OrderController::class, 'index']);       // Lấy danh sách đơn hàng
+//     Route::get('/{id}', [OrderController::class, 'show']);    // Lấy chi tiết đơn hàng
+//     Route::post('/', [OrderController::class, 'store']);      // Tạo đơn hàng
+//     Route::put('/{id}', [OrderController::class, 'update']);  // Cập nhật đơn hàng
+//     Route::delete('/{id}', [OrderController::class, 'destroy']); // Xóa đơn hàng
+// });
 //
 Route::apiResource('orders', OrderController::class);
 Route::apiResource('categories', CategoryController::class);

@@ -24,6 +24,46 @@ class ProductController extends Controller
         return ProductResource::collection($products);
     }
 
+    public function product_filtering(Request $request, $category_id = null)
+    {
+        $query = Product::with('author', 'publisher', 'language', 'category', 'genres', 'images', 'variants.cover')
+            ->where('del_flg', 0);
+
+        if ($category_id) {
+            $query->where('category_id', $category_id);
+        }
+
+        if ($request->has('language_id')) {
+            $query->where('language_id', $request->language_id);
+        }
+
+        if ($request->has('publisher_id')) {
+            $query->where('publisher_id', $request->publisher_id);
+        }
+
+        if ($request->has('author_id')) {
+            $query->where('author_id', $request->author_id);
+        }
+
+        // Lọc theo nhiều thể loại (genre_id)
+        if ($request->has('genre_id')) {
+            $genreIds = is_array($request->genre_id) ? $request->genre_id : explode(',', $request->genre_id);
+            $query->whereHas('genres', function ($q) use ($genreIds) {
+                $q->whereIn('genres.id', $genreIds);
+            });
+        }
+
+        if ($request->has('cover_id')) {
+            $query->whereHas('variants', function ($q) use ($request) {
+                $q->where('cover_id', $request->cover_id);
+            });
+        }
+
+        return ProductResource::collection($query->get());
+    }
+
+
+
     public function store(Request $request)
     {
         try {

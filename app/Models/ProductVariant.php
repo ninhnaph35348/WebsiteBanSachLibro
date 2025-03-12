@@ -8,7 +8,7 @@ use Illuminate\Database\Eloquent\Model;
 class ProductVariant extends Model
 {
     use HasFactory;
-    
+
 
     protected $table = 'product_variants';
     protected $fillable = [
@@ -17,10 +17,15 @@ class ProductVariant extends Model
         'price',
         'promotion',
         'del_flg', 
+        'cover_id',
         'promotion'
         ];
 
-
+    public function cover()
+    {
+        return $this->belongsTo(Cover::class, 'cover_id');
+    }
+    
     public function product()
     {
         return $this->belongsTo(Product::class, 'product_id', 'id');

@@ -12,7 +12,8 @@ class AuthorController extends Controller
      */
     public function index()
     {
-        $authors = Author::all();
+        $authors = Author::where('del_flg', 0)->get();
+
         return response()->json($authors);
     }
 
@@ -82,8 +83,8 @@ class AuthorController extends Controller
             return response()->json(['message' => "Không tìm thấy tên tác giả"], 404);
         }
 
-        $author->delete();
+        $author->update(['del_flg' => 1]);
 
-        return response()->json(['message' => 'Xóa tác giả thành công']);
+        return response()->json(['message' => 'Sản phẩm đã bị ẩn'], 200);
     }
 }

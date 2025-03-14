@@ -12,9 +12,10 @@ class PublisherController extends Controller
      */
     public function index()
     {
-        $publishers = Publisher::all();
-        return response()->json($publishers);
+        $publisher = Publisher::where('del_flg', 0)->get(); // Lấy dữ liệu chưa bị xóa
+        return response()->json($publisher, 200);
     }
+    
 
     /**publisher
      * Store a newly created resource in storage.
@@ -74,14 +75,14 @@ class PublisherController extends Controller
     public function destroy($id)
     {
         $publisher = Publisher::find($id);
-
-
+    
         if (!$publisher) {
-            return response()->json(['message' => "Không tìm thấy tên nhà xuất bản"], 404);
+            return response()->json(['message' => 'Không tìm thấy nhà xuất bản'], 404);
         }
-
-        $publisher->delete();
-
-        return response()->json(['message' => 'Xóa nhà xuất bản thành công']);
+    
+        $publisher->update(['del_flg' => 1]); // Xóa mềm bằng cách đặt del_flg = 1
+    
+        return response()->json(['message' => 'Nhà xuất bản đã bị ẩn'], 200);
     }
+    
 }

@@ -40,6 +40,7 @@ Route::middleware(['auth:sanctum'])->group(function () {
 });
 
 
+
 Route::prefix('orders')->group(function () {
     Route::get('/', [OrderController::class, 'index']);
     Route::get('/{id}', [OrderController::class, 'show']);
@@ -98,6 +99,14 @@ Route::prefix('products')->group(function () {
     Route::put('/{id}', [ProductController::class, 'destroy']);
 });
 
+Route::prefix('product_variants')->group(function () {
+    Route::get('/', [ProductVariantController::class, 'index']);
+    Route::get('/{id}', [ProductVariantController::class, 'show']);
+    Route::post('/', [ProductVariantController::class, 'store']);
+    Route::put('/edit/{id}', [ProductVariantController::class, 'update']);
+    Route::put('/{id}', [ProductVariantController::class, 'destroy']);
+});
+
 Route::prefix('users')->group(function () {
     Route::get('/', [UserController::class, 'index']);
     Route::get('/{id}', [UserController::class, 'show']);
@@ -114,15 +123,6 @@ Route::prefix('vouchers')->group(function () {
     Route::put('/{id}', [VoucherController::class, 'destroy']);
 });
 
-Route::prefix('product_variants')->group(function () {
-    Route::get('/', [ProductVariantController::class, 'index']);
-    Route::get('/{id}', [ProductVariantController::class, 'show']);
-    Route::post('/', [ProductVariantController::class, 'store']);
-    Route::put('/edit/{id}', [ProductVariantController::class, 'update']);
-    Route::put('/{id}', [ProductVariantController::class, 'destroy']);
-});
-
-
 Route::prefix('reviews')->group(function () {
     Route::get('/', [ReviewController::class, 'index']);
     Route::get('/{id}', [ReviewController::class, 'show']);
@@ -132,4 +132,10 @@ Route::prefix('reviews')->group(function () {
     Route::put('/{id}', [ReviewController::class, 'hidden']);
 });
 
+Route::prefix('orders')->group(function () {
+    Route::get('/', [OrderController::class, 'index']);
+    Route::get('/{id}', [OrderController::class, 'show']);
+    // Route::post('/', [OrderController::class, 'store']);
+    Route::put('/edit/{id}', [OrderController::class, 'update']);
+});
 Route::post('carts/order/checkout', [CartController::class, 'checkout']);

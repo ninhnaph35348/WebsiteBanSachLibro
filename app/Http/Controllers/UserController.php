@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\Validation\ValidationException;
 
 class UserController extends Controller
@@ -41,17 +42,19 @@ class UserController extends Controller
     public function store(Request $request)
     {
         try {
-            $request->validate([
+            $val = $request->validate([
                 'username' => 'required|string|max:255',
                 'fullname' => 'required|string|max:255',
                 'email' => 'required',
+                'avatar' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
                 'password' => 'required|string|min:6',
-                'phone' => 'string|max:20',
-                'address' => 'string',
-                'birth_date' => 'date',
+                'phone' => 'nullable|regex:/^[0-9]+$/|max:20',
+                'address' => 'nullable|string|max:255',
+                'birth_date' => 'nullable|date',
                 'status' => 'required|string',
                 'role' => 'required|string',
             ]);
+
             if (User::where('username', $request->username)->exists()) {
                 return response()->json(['message' => 'Username đã tồn tại'], 400);
             }
@@ -59,7 +62,12 @@ class UserController extends Controller
             if (User::where('email', $request->email)->exists()) {
                 return response()->json(['message' => 'Email đã tồn tại'], 400);
             }
-            $user = User::create($request->all());
+
+            if ($request->hasFile('avatar')) {
+                $avatarPath = $request->file('avatar')->store('uploads/user', 'public');
+                $val['avatar'] = $avatarPath; // Lưu đường dẫn đúng vào database
+            }
+            $user = User::create($val);
 
             return response()->json([
                 'message' => 'Thêm mới thành công',
@@ -72,21 +80,22 @@ class UserController extends Controller
             ], 500);
         }
     }
-
+    //
     // Cập nhật user
     public function update(Request $request, $id)
     {
         try {
-            $request->validate([
-                'username' => 'required|string|max:255',
-                'fullname' => 'required|string|max:255',
-                'email' => 'required',
-                'password' => 'required|string|min:6',
-                'phone' => 'string|max:20',
-                'address' => 'string',
-                'birth_date' => 'date',
-                'status' => 'required|string',
-                'role' => 'required|string',
+            $val = $request->validate([
+                'username' => 'string|max:255',
+                'fullname' => 'string|max:255',
+                'email' => 'email',
+                'avatar' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
+                'password' => 'string|min:6',
+                'phone' => 'nullable|regex:/^[0-9]+$/|max:20',
+                'address' => 'nullable|string|max:255',
+                'birth_date' => 'nullable|date',
+                'status' => 'string',
+                'role' => 'string',
             ]);
 
             $user = User::find($id);
@@ -103,7 +112,21 @@ class UserController extends Controller
                 return response()->json(['message' => 'Email đã tồn tại'], 400);
             }
 
-            $user->update($request->all());
+            if ($user->avatar) {
+                Storage::disk('public')->delete($user->avatar);
+            }
+
+            // ✅ Xử lý ảnh đại diện (image)
+            if ($request->hasFile('avatar')) {
+                $val['avatar'] = $request->file('avatar')->store('uploads/user', 'public');
+            } else {
+                $val['avatar'] = null;
+            }
+
+            // ✅ Cập nhật thông tin sản phẩm
+            $user->update($val);
+
+            // $user->update($request->all());
             return response()->json([
                 'message' => 'Sửa thành công',
                 'user' => $user
@@ -120,7 +143,7 @@ class UserController extends Controller
     public function destroy($id)
     {
         $user = User::find($id);
-        
+
         if (!$user) {
             return response()->json(['message' => 'User không tồn tại'], 404);
         }

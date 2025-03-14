@@ -21,9 +21,9 @@ class User extends Authenticatable
         'phone',
         'address',
         'birth_date',
-        'user_type',
         'status',
         'role',
+        'del_flg',
     ];
     /**
      * The attributes that should be hidden for serialization.
@@ -44,14 +44,23 @@ class User extends Authenticatable
         'email_verified_at' => 'datetime',
         'password' => 'hashed',
     ];
-
     public function isSuperAdmin()
     {
-        return $this->role === 0;
+        return $this->role === "s.admin";
     }
 
     public function isAdmin()
     {
-        return $this->role === 1;
+        return $this->role === "admin";
+    }
+    public function isClient()
+    {
+        return $this->role === 'client';
+    }
+
+
+    public function reviews()
+    {
+        return $this->hasMany(Review::class, 'user_id');
     }
 }

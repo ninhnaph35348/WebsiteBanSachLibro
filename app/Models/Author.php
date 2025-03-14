@@ -9,8 +9,11 @@ class Author extends Model
 {
     use HasFactory;
 
+    protected $table = 'authors';
+
     protected $fillable = [
         'name',
+        'del_flg'
     ];
 
     public function products()

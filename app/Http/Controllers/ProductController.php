@@ -17,8 +17,52 @@ class ProductController extends Controller
      */
     public function index()
     {
-        return ProductResource::collection(Product::with('author', 'publisher', 'language', 'category', 'genres', 'images')->get());
+        $products = Product::with('author', 'publisher', 'language', 'category', 'genres', 'images')
+            ->where('del_flg', 0)
+            ->get();
+
+        return ProductResource::collection($products);
     }
+
+    public function product_filtering(Request $request, $category_id = null)
+    {
+        $query = Product::with('author', 'publisher', 'language', 'category', 'genres', 'images', 'variants.cover')
+            ->where('del_flg', 0);
+
+        if ($request->has('category_id')) {
+            $query->where('category_id', $request->category_id);
+        }
+
+        if ($request->has('language_id')) {
+            $query->where('language_id', $request->language_id);
+        }
+
+        if ($request->has('publisher_id')) {
+            $query->where('publisher_id', $request->publisher_id);
+        }
+
+        if ($request->has('author_id')) {
+            $query->where('author_id', $request->author_id);
+        }
+
+        // Lọc theo nhiều thể loại (genre_id)
+        if ($request->has('genre_id')) {
+            $genreIds = is_array($request->genre_id) ? $request->genre_id : explode(',', $request->genre_id);
+            $query->whereHas('genres', function ($q) use ($genreIds) {
+                $q->whereIn('genres.id', $genreIds);
+            });
+        }
+
+        if ($request->has('cover_id')) {
+            $query->whereHas('variants', function ($q) use ($request) {
+                $q->where('cover_id', $request->cover_id);
+            });
+        }
+
+        return ProductResource::collection($query->get());
+    }
+
+
 
     public function store(Request $request)
     {
@@ -36,6 +80,9 @@ class ProductController extends Controller
                 'category_id' => 'required|exists:categories,id',
             ]);
 
+            if (Product::where('code', $request->code)->exists()) {
+                return response()->json(['message' => 'Mã sản phẩm đã tồn tại'], 400);
+            }
             // Xử lý ảnh đại diện (nếu có)
             if ($request->hasFile('image')) {
                 $imagePath = $request->file('image')->store('uploads', 'public');
@@ -107,7 +154,6 @@ class ProductController extends Controller
 
             // ✅ Validate dữ liệu gửi lên
             $validatedData = $request->validate([
-                'code' => 'sometimes|string|max:50',
                 'title' => 'sometimes|string|max:255',
                 'image' => 'nullable',
                 'supplier_name' => 'sometimes|string|max:150',
@@ -132,7 +178,7 @@ class ProductController extends Controller
 
                 // Lưu ảnh mới
                 $validatedData['image'] = $request->file('image')->store('uploads', 'public');
-            }else{
+            } else {
                 $validatedData['image'] = null;
             }
 
@@ -202,10 +248,10 @@ class ProductController extends Controller
             // Xóa quan hệ với genres (tránh rác trong bảng pivot)
             $product->genres()->detach();
 
-            // Xóa sản phẩm
-            $product->delete();
 
-            return response()->json(['message' => 'Xóa sản phẩm thành công'], 200);
+            $product->update(['del_flg' => 1]);
+
+            return response()->json(['message' => 'Sản phẩm đã bị ẩn'], 200);
         } catch (\Exception $e) {
             return response()->json([
                 'message' => 'Lỗi khi xóa sản phẩm',

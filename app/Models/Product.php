@@ -9,6 +9,8 @@ class Product extends Model
 {
     use HasFactory;
 
+    protected $table = 'products';
+
     protected $fillable = [
         'code',
         'title',
@@ -19,6 +21,7 @@ class Product extends Model
         'description',
         'language_id',
         'category_id',
+        'del_flg',
         'status'
     ];
 
@@ -46,13 +49,19 @@ class Product extends Model
     {
         return $this->belongsToMany(Genre::class, 'product_genres', 'product_id', 'genre_id');
     }
-    // public function productGenre()
-    // {
-    //     return $this->hasMany(ProductGenre::class);
-    // }
 
     public function images()
     {
         return $this->hasMany(MultipleImage::class, 'product_id');
+    }
+
+    public function variants()
+    {
+        return $this->hasMany(ProductVariant::class, 'product_id', 'id');
+    }
+
+    public function reviews()
+    {
+        return $this->hasMany(Review::class, 'product_id');
     }
 }

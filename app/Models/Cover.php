@@ -5,18 +5,19 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
-class Publisher extends Model
+class Cover extends Model
 {
     use HasFactory;
 
-    protected $table = 'publishers';
-
+    protected $table = 'covers';
     protected $fillable = [
         'name',
+        'del_flg'
     ];
 
-    public function products()
+
+    public function productVariants()
     {
-        return $this->hasMany(Product::class);
+        return $this->hasMany(ProductVariant::class, 'cover_id');
     }
 }

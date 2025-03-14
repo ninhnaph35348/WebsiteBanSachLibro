@@ -54,7 +54,7 @@ class UserController extends Controller
                 'status' => 'required|string',
                 'role' => 'required|string',
             ]);
-
+//
             if (User::where('username', $request->username)->exists()) {
                 return response()->json(['message' => 'Username đã tồn tại'], 400);
             }
@@ -65,7 +65,11 @@ class UserController extends Controller
 
             if ($request->hasFile('avatar')) {
                 $avatarPath = $request->file('avatar')->store('uploads/user', 'public');
+
                 $val['avatar'] = $avatarPath; // Lưu đường dẫn đúng vào database
+
+                $val['avatar'] = 'storage/' . $avatarPath; // Lưu đường dẫn đúng vào database
+
             }
             $user = User::create($val);
 

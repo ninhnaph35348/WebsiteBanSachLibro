@@ -35,14 +35,13 @@ class ReviewController extends Controller
             $request->validate([
                 'rating' => 'required|integer|min:1|max:5',
                 'review' => 'required|string|max:255',
-                'status' => 'required|boolean',
                 'product_id' => 'required|exists:products,id',
             ]);
 
             $review = Review::create([
                 'rating' => $request->rating,
                 'review' => $request->review,
-                'status' => $request->status,
+                'status' => 1,
                 'product_id' => $request->product_id,
                 // 'user_id' => Auth::id(), // Lấy user_id từ Auth
                 'user_id' => $request->user_id,
@@ -56,25 +55,20 @@ class ReviewController extends Controller
     }
 
 
-    // // Cập nhật review
-    // public function update(Request $request, $id)
-    // {
-    //     $review = Review::find($id);
+    // Cập nhật review
+    // Cập nhật review
+    public function update(Request $request, $id)
+    {
+        $review = Review::find($id);
 
-    //     if (!$review) {
-    //         return response()->json(['message' => 'Không tìm thấy đánh giá'], 404);
-    //     }
+        if (!$review) {
+            return response()->json(['message' => 'Không tìm thấy đánh giá'], 404);
+        }
 
-    //     $request->validate([
-    //         'rating' => 'integer|min:1|max:5',
-    //         'review' => 'string|max:255',
-    //         'status' => 'integer|in:0,1',
-    //     ]);
+        $review->update(['status' => 0]); // Cập nhật status = 0, không cho phép cập nhật giá trị khác
 
-    //     $review->update($request->all());
-
-    //     return response()->json(['message' => 'Đánh giá đã được tạo thành công', 'review' => $review], 200);
-    // }
+        return response()->json(['message' => 'Cập nhật trạng thái thành công', 'review' => $review], 200);
+    }
 
 
 

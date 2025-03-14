@@ -13,6 +13,7 @@ class GenreController extends Controller
         ->where('del_flg', 0);
         return response()->json($genres);
     }
+    
 
     /**genre
      * Store a newly created resource in storage.
@@ -84,4 +85,5 @@ class GenreController extends Controller
 
         return response()->json(['message' => 'Thể loại sách đã bị ẩn']);
     }
+    
 }

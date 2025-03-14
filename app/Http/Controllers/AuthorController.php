@@ -17,6 +17,7 @@ class AuthorController extends Controller
         return response()->json($authors);
     }
 
+
     /**Author
      * Store a newly created resource in storage.
      */
@@ -87,4 +88,6 @@ class AuthorController extends Controller
 
         return response()->json(['message' => 'Sản phẩm đã bị ẩn'], 200);
     }
+    
+    
 }

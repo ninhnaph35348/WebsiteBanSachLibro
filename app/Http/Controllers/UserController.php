@@ -80,7 +80,7 @@ class UserController extends Controller
             ], 500);
         }
     }
-
+//
     // Cập nhật user
     public function update(Request $request, $id)
     {

@@ -123,18 +123,19 @@ class ProductController extends Controller
     /**
      * Display the specified resource.
      */
-    public function show($id)
+    public function show($code)
     {
-        $product = Product::find($id);
-
-        // dd($product);
+        $product = Product::where('code', $code)->first();
 
         if (!$product) {
             return response()->json(['message' => "Không tìm thấy sản phẩm"], 404);
         }
 
-        return new ProductResource(Product::with('author', 'publisher', 'language', 'category', 'genres', 'images')->findOrFail($id));
+        return new ProductResource(
+            $product->load('author', 'publisher', 'language', 'category', 'genres', 'images')
+        );
     }
+
 
     /**
      * Update the specified resource in storage.

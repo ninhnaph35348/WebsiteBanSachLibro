@@ -80,22 +80,22 @@ class UserController extends Controller
             ], 500);
         }
     }
-//
+    //
     // Cập nhật user
     public function update(Request $request, $id)
     {
         try {
             $val = $request->validate([
-                'username' => 'required|string|max:255',
-                'fullname' => 'required|string|max:255',
-                'email' => 'required',
+                'username' => 'string|max:255',
+                'fullname' => 'string|max:255',
+                'email' => 'email',
                 'avatar' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
-                'password' => 'required|string|min:6',
+                'password' => 'string|min:6',
                 'phone' => 'nullable|regex:/^[0-9]+$/|max:20',
                 'address' => 'nullable|string|max:255',
                 'birth_date' => 'nullable|date',
-                'status' => 'required|string',
-                'role' => 'required|string',
+                'status' => 'string',
+                'role' => 'string',
             ]);
 
             $user = User::find($id);

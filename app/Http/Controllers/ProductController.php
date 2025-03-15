@@ -164,7 +164,7 @@ class ProductController extends Controller
                 'genres.*' => 'exists:genres,id',
                 'images'
             ]);
-            
+
             // ✅ Xử lý ảnh đại diện (image)
             if ($request->hasFile('image')) {
                 // Lưu ảnh mới
@@ -220,9 +220,9 @@ class ProductController extends Controller
     /**
      * Remove the specified resource from storage.
      */
-    public function destroy($id)
+    public function destroy($code)
     {
-        $product = Product::find($id);
+        $product = Product::where('code', $code)->first();
 
         if (!$product) {
             return response()->json(['message' => "Không tìm thấy sản phẩm"], 404);

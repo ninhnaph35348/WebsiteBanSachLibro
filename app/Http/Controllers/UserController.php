@@ -120,7 +120,7 @@ class UserController extends Controller
     public function destroy($id)
     {
         $user = User::find($id);
-        
+
         if (!$user) {
             return response()->json(['message' => 'User không tồn tại'], 404);
         }

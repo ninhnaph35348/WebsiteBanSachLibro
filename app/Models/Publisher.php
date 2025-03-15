@@ -9,8 +9,11 @@ class Publisher extends Model
 {
     use HasFactory;
 
+    protected $table = 'publishers';
+
     protected $fillable = [
         'name',
+        'del_flg',
     ];
 
     public function products()

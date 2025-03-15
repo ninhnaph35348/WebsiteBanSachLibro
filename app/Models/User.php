@@ -48,7 +48,7 @@ class User extends Authenticatable
     {
         return $this->role === "s.admin";
     }
-    
+
     public function isAdmin()
     {
         return $this->role === "admin";
@@ -56,5 +56,11 @@ class User extends Authenticatable
     public function isClient()
     {
         return $this->role === 'client';
+    }
+
+
+    public function reviews()
+    {
+        return $this->hasMany(Review::class, 'user_id');
     }
 }

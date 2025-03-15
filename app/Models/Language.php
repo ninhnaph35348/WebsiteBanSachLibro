@@ -9,8 +9,11 @@ class Language extends Model
 {
     use HasFactory;
 
+    protected $table = 'languages';
+
     protected $fillable = [
         'name',
+        'del_flg',
     ];
 
     public function products()

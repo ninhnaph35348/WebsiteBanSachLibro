@@ -4,6 +4,7 @@ use App\Http\Controllers\AuthController;
 use App\Http\Controllers\ProductVariantController;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\AuthorController;
+use App\Http\Controllers\CartController;
 use App\Http\Controllers\CategoryController;
 use App\Http\Controllers\GenreController;
 use App\Http\Controllers\LanguageController;
@@ -38,13 +39,16 @@ Route::middleware(['auth:sanctum'])->group(function () {
     Route::post('/logout', [AuthController::class, 'logout']);
 });
 
+
+
+
 Route::prefix('orders')->group(function () {
     Route::get('/', [OrderController::class, 'index']);
     Route::get('/{id}', [OrderController::class, 'show']);
-    Route::post('/', [OrderController::class, 'store']);
+    // Route::post('/', [OrderController::class, 'store']);
     Route::put('/edit/{id}', [OrderController::class, 'update']);
-    Route::put('/{id}', [OrderController::class, 'destroy']);
 });
+
 
 Route::prefix('categories')->group(function () {
     Route::get('/', [CategoryController::class, 'index']);
@@ -88,10 +92,21 @@ Route::prefix('genres')->group(function () {
 
 Route::prefix('products')->group(function () {
     Route::get('/', [ProductController::class, 'index']);
+    Route::get('/latest', [ProductController::class, 'latest']);
+    Route::get('/search', [ProductController::class, 'search']);
+    Route::get('/filter', [ProductController::class, 'product_filtering']);
     Route::get('/{id}', [ProductController::class, 'show']);
     Route::post('/', [ProductController::class, 'store']);
     Route::put('/edit/{id}', [ProductController::class, 'update']);
     Route::put('/{id}', [ProductController::class, 'destroy']);
+});
+
+Route::prefix('product_variants')->group(function () {
+    Route::get('/', [ProductVariantController::class, 'index']);
+    Route::get('/{id}', [ProductVariantController::class, 'show']);
+    Route::post('/', [ProductVariantController::class, 'store']);
+    Route::put('/edit/{id}', [ProductVariantController::class, 'update']);
+    Route::put('/{id}', [ProductVariantController::class, 'destroy']);
 });
 
 Route::prefix('users')->group(function () {
@@ -110,20 +125,19 @@ Route::prefix('vouchers')->group(function () {
     Route::put('/{id}', [VoucherController::class, 'destroy']);
 });
 
-Route::prefix('product_variants')->group(function () {
-    Route::get('/', [ProductVariantController::class, 'index']);
-    Route::get('/{id}', [ProductVariantController::class, 'show']);
-    Route::post('/', [ProductVariantController::class, 'store']);
-    Route::put('/edit/{id}', [ProductVariantController::class, 'update']);
-    Route::put('/{id}', [ProductVariantController::class, 'destroy']);
-});
-
-
 Route::prefix('reviews')->group(function () {
     Route::get('/', [ReviewController::class, 'index']);
     Route::get('/{id}', [ReviewController::class, 'show']);
     Route::post('/', [ReviewController::class, 'store']);
     Route::put('/edit/{id}', [ReviewController::class, 'update']);
-    Route::put('/{id}', [ReviewController::class, 'destroy']);
+    Route::delete('/{id}', [ReviewController::class, 'destroy']);
+    Route::put('/{id}', [ReviewController::class, 'hidden']);
 });
 
+Route::prefix('orders')->group(function () {
+    Route::get('/', [OrderController::class, 'index']);
+    Route::get('/{id}', [OrderController::class, 'show']);
+    // Route::post('/', [OrderController::class, 'store']);
+    Route::put('/edit/{id}', [OrderController::class, 'update']);
+});
+Route::post('carts/order/checkout', [CartController::class, 'checkout']);

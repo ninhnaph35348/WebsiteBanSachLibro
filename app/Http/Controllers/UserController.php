@@ -54,7 +54,7 @@ class UserController extends Controller
                 'status' => 'required|string',
                 'role' => 'required|string',
             ]);
-//
+            //
             if (User::where('username', $request->username)->exists()) {
                 return response()->json(['message' => 'Username đã tồn tại'], 400);
             }
@@ -67,8 +67,6 @@ class UserController extends Controller
                 $avatarPath = $request->file('avatar')->store('uploads/user', 'public');
 
                 $val['avatar'] = $avatarPath; // Lưu đường dẫn đúng vào database
-
-                $val['avatar'] = 'storage/' . $avatarPath; // Lưu đường dẫn đúng vào database
 
             }
             $user = User::create($val);
@@ -115,16 +113,16 @@ class UserController extends Controller
             if (User::where('email', $request->email)->where('id', '!=', $id)->exists()) {
                 return response()->json(['message' => 'Email đã tồn tại'], 400);
             }
-
-            if ($user->avatar) {
-                Storage::disk('public')->delete($user->avatar);
-            }
-
-            // ✅ Xử lý ảnh đại diện (image)
+            
+            // ✅ Xử lý ảnh đại diện (avatar)
             if ($request->hasFile('avatar')) {
+                // Xóa avatar cũ nếu có
+                if ($user->avatar) {
+                    Storage::disk('public')->delete($user->avatar);
+                }
+
+                // Lưu avatar mới
                 $val['avatar'] = $request->file('avatar')->store('uploads/user', 'public');
-            } else {
-                $val['avatar'] = null;
             }
 
             // ✅ Cập nhật thông tin sản phẩm

@@ -7,9 +7,15 @@ use Illuminate\Database\Eloquent\Model;
 
 class OrderStatus extends Model
 {
+    use HasFactory;
 
     protected $table = 'order_statuses';
 
-    use HasFactory;
+    protected $fillable = ['name'];
+
+    // Liên kết với Order
+    public function orders()
+    {
+        return $this->hasMany(Order::class, 'order_status_id');
+    }
 }
-//

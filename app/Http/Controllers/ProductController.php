@@ -140,12 +140,9 @@ class ProductController extends Controller
     /**
      * Update the specified resource in storage.
      */
-    public function update(Request $request, $id)
+    public function update(Request $request, $code)
     {
-        // dd($request->file('image'), $request->file('images'));
-        $product = Product::find($id);
-        // echo '<pre>';
-        // print_r($request->all());die();
+        $product = Product::where('code', $code)->first();
 
         if (!$product) {
             return response()->json(['message' => "Không tìm thấy sản phẩm"], 404);
@@ -167,27 +164,20 @@ class ProductController extends Controller
                 'genres.*' => 'exists:genres,id',
                 'images'
             ]);
-            if ($product->image) {
-                Storage::disk('public')->delete($product->image);
-            }
-            foreach ($product->images as $image) {
-                Storage::disk('public')->delete($image->image_link); // Xóa file trong storage
-                $image->delete(); // Xóa record trong DB
-            }
+            
             // ✅ Xử lý ảnh đại diện (image)
             if ($request->hasFile('image')) {
-
                 // Lưu ảnh mới
                 $validatedData['image'] = $request->file('image')->store('uploads', 'public');
-            } else {
-                $validatedData['image'] = null;
+
+                // Xóa ảnh cũ nếu có
+                if ($product->image) {
+                    Storage::disk('public')->delete($product->image);
+                }
             }
 
             // ✅ Cập nhật thông tin sản phẩm
             $product->update($validatedData);
-
-
-
 
             // ✅ Cập nhật genres (nếu có gửi lên)
             if ($request->has('genres')) {
@@ -196,6 +186,11 @@ class ProductController extends Controller
 
             // ✅ Xử lý nhiều ảnh (images)
             if ($request->hasFile('images')) {
+                // Xóa ảnh cũ nếu có ảnh mới được tải lên
+                foreach ($product->images as $image) {
+                    Storage::disk('public')->delete($image->image_link); // Xóa file trong storage
+                    $image->delete(); // Xóa record trong DB
+                }
 
                 // 🔥 Lưu ảnh mới
                 $imagePaths = [];
@@ -203,16 +198,15 @@ class ProductController extends Controller
                     $imagePaths[] = ['image_link' => $imageFile->store('uploads', 'public')];
                 }
                 $product->images()->createMany($imagePaths);
-
-                // dd($imagePaths);
             }
+
 
             DB::commit(); // Lưu thay đổi vào database
 
             return response()->json([
                 'message' => 'Cập nhật sản phẩm thành công',
                 'product' => new ProductResource($product->load('author', 'publisher', 'language', 'category', 'genres', 'images')),
-                'image_url' => $product->image ? asset('storage/' . $product->image) : null,
+                // 'image_url' => $product->image ? asset('storage/' . $product->image) : null,
             ], 200);
         } catch (\Exception $e) {
             DB::rollBack(); // Hoàn tác nếu có lỗi xảy ra

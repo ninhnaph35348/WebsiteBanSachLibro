@@ -15,6 +15,7 @@ use App\Http\Controllers\ReviewController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\OrderController;
+use App\Http\Controllers\OrderStatusController;
 
 /*
 |--------------------------------------------------------------------------
@@ -141,3 +142,6 @@ Route::prefix('orders')->group(function () {
     Route::put('/edit/{id}', [OrderController::class, 'update']);
 });
 Route::post('carts/order/checkout', [CartController::class, 'checkout']);
+
+
+Route::get('status', [OrderStatusController::class, 'getAllOrderStatus']);

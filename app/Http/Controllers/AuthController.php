@@ -15,7 +15,7 @@ class AuthController extends Controller
             'username' => 'required|string|max:255|unique:users', //username không được trùng vì có UNIQUE KEY
             'fullname' => 'required|string|max:255',
             'email' => 'required|string|email|max:255',
-            'password' => 'required|string|min:6',
+            'password' => 'required|string|min:6|confirmed',
         ]);
 
         if ($validator->fails()) {
@@ -27,7 +27,7 @@ class AuthController extends Controller
             'fullname' => $request->fullname,
             'email' => $request->email,
             'password' => Hash::make($request->password),
-            'role' => $request->role,
+            'role' => $request->role ?? 'client', // Mặc định là 'client'
         ]);
 
         $token = $user->createToken('auth_token')->plainTextToken;

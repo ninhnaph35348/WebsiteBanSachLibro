@@ -32,7 +32,8 @@ use App\Http\Controllers\OrderStatusController;
 //     return $request->user();
 // });
 
-
+// Dang ky
+Route::post('/register', [AuthController::class, 'register']);
 // Đăng nhâp đăng xuất
 Route::get('/login', [AuthController::class, 'login_'])->name('login');
 Route::post('/login', [AuthController::class, 'login']);

@@ -113,7 +113,7 @@ class UserController extends Controller
             if (User::where('email', $request->email)->where('id', '!=', $id)->exists()) {
                 return response()->json(['message' => 'Email đã tồn tại'], 400);
             }
-            
+
             // ✅ Xử lý ảnh đại diện (avatar)
             if ($request->hasFile('avatar')) {
                 // Xóa avatar cũ nếu có

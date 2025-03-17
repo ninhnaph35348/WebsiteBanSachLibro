@@ -8,8 +8,9 @@ use Illuminate\Database\Eloquent\Model;
 class Order extends Model
 {
     use HasFactory;
-    //
+
     protected $table = 'orders';
+
     protected $fillable = [
         'code_order',
         'total_price',
@@ -24,24 +25,27 @@ class Order extends Model
         'user_address',
     ];
 
-    // Liên kết với các bảng khác
+    // Liên kết với OrderStatus
     public function status()
     {
         return $this->belongsTo(OrderStatus::class, 'order_status_id');
     }
 
-    public function payment()
-    {
-        return $this->belongsTo(PaymentMethod::class, 'payment_id');
-    }
-
+    // Liên kết với Voucher
     public function voucher()
     {
         return $this->belongsTo(Voucher::class, 'voucher_id');
     }
 
+    // Liên kết với User
     public function user()
     {
         return $this->belongsTo(User::class, 'user_id');
+    }
+
+    // Liên kết với OrderDetails (giả sử có bảng chứa chi tiết đơn hàng)
+    public function orderDetails()
+    {
+        return $this->hasMany(OrderDetail::class, 'order_id');
     }
 }

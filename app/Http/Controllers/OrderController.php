@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Resources\OrderResource;
 use App\Models\Order;
 use App\Models\Product;
 use App\Models\ProductVariant;
@@ -16,26 +17,32 @@ class OrderController extends Controller
     // Lấy danh sách đơn hàng
     public function index()
     {
-        return response()->json(Order::all());
+        $orders = Order::with(['status', 'voucher', 'user'])->get();
+
+        return OrderResource::collection($orders);
     }
 
+
+
     // Lấy thông tin 1 đơn hàng
-    public function show($id)
+    public function show($code_order)
     {
-        $order = Order::find($id);
+        $order = Order::where('code_order', $code_order)->first();
         if (!$order) {
             return response()->json(['message' => 'Không tìm thấy đơn hàng'], 404);
         }
-        return response()->json($order);
+        return new OrderResource(
+            $order->load(['status', 'voucher', 'user'])
+        );
     }
 
 
     // Cập nhật đơn hàng
 
 
-    public function update(Request $request, $id)
+    public function update(Request $request, $code_order)
     {
-        $order = Order::find($id);
+        $order = Order::where('code_order', $code_order)->first();
         if (!$order) {
             return response()->json(['message' => 'Không tìm thấy đơn hàng'], 404);
         }
@@ -49,16 +56,22 @@ class OrderController extends Controller
             return response()->json(['message' => 'Không thể thay đổi trạng thái trước đó'], 400);
         }
 
-        if($order->order_status_id >=3 && $request['order_status_id'] == 7){
+        if ($order->order_status_id >= 3 && $request['order_status_id'] == 7) {
             return response()->json(['message' => 'Không thể hủy nếu đơn hàng đã đang chuẩn bị hàng trở lên'], 400);
         }
 
+        // Cập nhật trạng thái đơn hàng
         $order->update(['order_status_id' => $request['order_status_id']]);
+
+        // Lấy tên trạng thái đơn hàng
+        $orderStatus = DB::table('order_statuses')->where('id', $request['order_status_id'])->value('name');
 
         return response()->json([
             'message' => 'Cập nhật trạng thái đơn hàng thành công',
-            'data' => $order
+            'data' => [
+                'code_order' => $order->code_order,
+                'order_status_name' => $orderStatus, // Hiển thị tên trạng thái
+            ]
         ]);
     }
-
 }

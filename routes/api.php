@@ -17,6 +17,7 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\OrderController;
 use App\Http\Controllers\OrderDetailController;
 use App\Http\Controllers\OrderStatusController;
+use App\Models\User;
 
 /*
 |--------------------------------------------------------------------------
@@ -42,6 +43,10 @@ Route::middleware(['auth:sanctum'])->group(function () {
     Route::post('/logout', [AuthController::class, 'logout']);
     Route::get('/order_detail', [OrderDetailController::class, 'index']);
     Route::get('/order_detail/{code_order}', [OrderDetailController::class, 'show']);
+});
+
+Route::middleware('auth:sanctum')->get('/me', function (Request $request) {
+    return response()->json(['user' => $request->user()]);
 });
 
 // Routes cho Super Admin (Toàn quyền, bao gồm quản lý users)

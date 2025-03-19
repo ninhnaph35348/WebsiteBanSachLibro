@@ -1,13 +1,45 @@
 <?php
 
 namespace App\Http\Controllers;
-
+use App\Models\User;
+use Illuminate\Support\Facades\Hash;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Validator;
 //
 class AuthController extends Controller
 {
+    public function register(Request $request)
+    {
+        $validator = Validator::make($request->all(), [
+            'username' => 'required|string|max:255|unique:users', //username không được trùng vì có UNIQUE KEY
+            'fullname' => 'required|string|max:255',
+            'email' => 'required|string|email|max:255',
+            'password' => 'required|string|min:6|confirmed',
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json(['message' => $validator->errors()], 400);
+        }
+
+        $user = User::create([
+            'username' => $request->username,
+            'fullname' => $request->fullname,
+            'email' => $request->email,
+            'password' => Hash::make($request->password),
+            'role' => 'client',
+        ]);
+
+        $token = $user->createToken('auth_token')->plainTextToken;
+
+        return response()->json([
+            'message' => 'Đăng ký thành công',
+            'user' => $user,
+            'token' => $token
+        ], 201);
+    }
+
+
     // Đăng nhập
     public function login_()
     {

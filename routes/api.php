@@ -89,6 +89,9 @@ Route::middleware(['auth:sanctum',  'role:s.admin|admin'])->group(function () {
     });
     Route::prefix('products')->group(function () {
         Route::get('/', [ProductController::class, 'index']);
+        Route::get('/latest', [ProductController::class, 'latest']);
+        Route::get('/search', [ProductController::class, 'search']);
+        Route::get('/filter', [ProductController::class, 'product_filtering']);
         Route::get('/{id}', [ProductController::class, 'show']);
         Route::post('/', [ProductController::class, 'store']);
         Route::put('/edit/{id}', [ProductController::class, 'update']);
@@ -118,7 +121,7 @@ Route::middleware(['auth:sanctum',  'role:s.admin|admin'])->group(function () {
         Route::get('/{id}', [ReviewController::class, 'show']);
         Route::post('/', [ReviewController::class, 'store']);
         Route::put('/edit/{id}', [ReviewController::class, 'update']);
-        Route::delete('/{id}', [ReviewController::class, 'destroy']);
+        Route::put('/{id}', [ReviewController::class, 'destroy']);
     });
     Route::post('carts/order/checkout', [CartController::class, 'checkout']);
     Route::get('status', [OrderStatusController::class, 'getAllOrderStatus']);

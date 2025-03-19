@@ -17,6 +17,7 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\OrderController;
 use App\Http\Controllers\OrderDetailController;
 use App\Http\Controllers\OrderStatusController;
+use App\Models\User;
 
 /*
 |--------------------------------------------------------------------------
@@ -33,7 +34,8 @@ use App\Http\Controllers\OrderStatusController;
 //     return $request->user();
 // });
 
-
+// Dang ky
+Route::post('/register', [AuthController::class, 'register']);
 // Đăng nhâp đăng xuất
 Route::get('/login', [AuthController::class, 'login_'])->name('login');
 Route::post('/login', [AuthController::class, 'login']);
@@ -41,6 +43,10 @@ Route::middleware(['auth:sanctum'])->group(function () {
     Route::post('/logout', [AuthController::class, 'logout']);
     Route::get('/order_detail', [OrderDetailController::class, 'index']);
     Route::get('/order_detail/{code_order}', [OrderDetailController::class, 'show']);
+});
+
+Route::middleware('auth:sanctum')->get('/me', function (Request $request) {
+    return response()->json(['user' => $request->user()]);
 });
 
 // Routes cho Super Admin (Toàn quyền, bao gồm quản lý users)
@@ -92,6 +98,9 @@ Route::middleware(['auth:sanctum',  'role:s.admin|admin'])->group(function () {
     });
     Route::prefix('products')->group(function () {
         Route::get('/', [ProductController::class, 'index']);
+        Route::get('/latest', [ProductController::class, 'latest']);
+        Route::get('/search', [ProductController::class, 'search']);
+        Route::get('/filter', [ProductController::class, 'product_filtering']);
         Route::get('/{id}', [ProductController::class, 'show']);
         Route::post('/', [ProductController::class, 'store']);
         Route::put('/edit/{id}', [ProductController::class, 'update']);
@@ -122,11 +131,16 @@ Route::middleware(['auth:sanctum',  'role:s.admin|admin'])->group(function () {
         Route::post('/', [ReviewController::class, 'store']);
         Route::put('/edit/{id}', [ReviewController::class, 'update']);
         Route::delete('/{id}', [ReviewController::class, 'destroy']);
+        Route::put('/{id}', [ReviewController::class, 'hidden']);
     });
-    Route::post('carts/order/checkout', [CartController::class, 'checkout']);
     Route::get('status', [OrderStatusController::class, 'getAllOrderStatus']);
 });
 
+Route::post('carts/order/checkout', [CartController::class, 'checkout']);
+Route::get('orders/status', [OrderStatusController::class, 'getAllOrderStatus']);
+Route::get('products/latest', [ProductController::class, 'latest']);
+Route::get('products/search', [ProductController::class, 'search']);
+Route::get('products/filter', [ProductController::class, 'product_filtering']);
 
 
 // function Nháp() : Nháp {

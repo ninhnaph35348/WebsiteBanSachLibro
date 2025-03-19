@@ -89,6 +89,9 @@ Route::middleware(['auth:sanctum',  'role:s.admin|admin'])->group(function () {
     });
     Route::prefix('products')->group(function () {
         Route::get('/', [ProductController::class, 'index']);
+        Route::get('/latest', [ProductController::class, 'latest']);
+        Route::get('/search', [ProductController::class, 'search']);
+        Route::get('/filter', [ProductController::class, 'product_filtering']);
         Route::get('/{id}', [ProductController::class, 'show']);
         Route::post('/', [ProductController::class, 'store']);
         Route::put('/edit/{id}', [ProductController::class, 'update']);

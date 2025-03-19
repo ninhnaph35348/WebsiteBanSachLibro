@@ -254,4 +254,37 @@ class ProductController extends Controller
             ], 500);
         }
     }
+
+    public function latest()
+    {
+        $products = Product::orderBy('created_at', 'desc')->take(10)->get();
+        return response()->json($products);
+    }
+    public function search(Request $request)
+    {
+        $keyword = $request->input('s');
+
+        $query = Product::query();
+
+        if ($keyword) {
+            $query->where(function ($q) use ($keyword) {
+                $q->where('title', 'like', '%' . $keyword . '%')
+                    ->orWhere('code', 'like', '%' . $keyword . '%')
+                    ->orWhere('supplier_name', 'like', '%' . $keyword . '%')
+                    ->orWhere('description', 'like', '%' . $keyword . '%');
+            });
+        }
+
+        if ($request->has('category_id')) {
+            $query->where('category_id', $request->input('category_id'));
+        }
+
+        if ($request->has('status')) {
+            $query->where('status', $request->input('status'));
+        }
+
+        $products = $query->paginate(10);
+
+        return response()->json($products);
+    }
 }

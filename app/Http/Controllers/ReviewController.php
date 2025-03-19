@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Resources\ReviewResource;
 use Illuminate\Http\Request;
 use App\Models\Review;
 use Illuminate\Support\Facades\Auth;
@@ -11,8 +12,8 @@ class ReviewController extends Controller
     // Lấy danh sách tất cả reviews
     public function index()
     {
-        $reviews = Review::all()->where('del_flg', 0);
-        return response()->json($reviews, 200);
+        $reviews = Review::where('del_flg', 0)->get();
+        return response()->json(ReviewResource::collection($reviews), 200);
     }
 
     // Lấy chi tiết một review

@@ -121,12 +121,17 @@ Route::middleware(['auth:sanctum',  'role:s.admin|admin'])->group(function () {
         Route::get('/{id}', [ReviewController::class, 'show']);
         Route::post('/', [ReviewController::class, 'store']);
         Route::put('/edit/{id}', [ReviewController::class, 'update']);
-        Route::put('/{id}', [ReviewController::class, 'destroy']);
+        Route::delete('/{id}', [ReviewController::class, 'destroy']);
+        Route::put('/{id}', [ReviewController::class, 'hidden']);
     });
-    Route::post('carts/order/checkout', [CartController::class, 'checkout']);
     Route::get('status', [OrderStatusController::class, 'getAllOrderStatus']);
 });
 
+Route::post('carts/order/checkout', [CartController::class, 'checkout']);
+Route::get('orders/status', [OrderStatusController::class, 'getAllOrderStatus']);
+Route::get('products/latest', [ProductController::class, 'latest']);
+Route::get('products/search', [ProductController::class, 'search']);
+Route::get('products/filter', [ProductController::class, 'product_filtering']);
 
 
 // function Nháp() : Nháp {

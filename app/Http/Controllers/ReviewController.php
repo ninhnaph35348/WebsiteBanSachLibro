@@ -18,15 +18,16 @@ class ReviewController extends Controller
 
     // Lấy chi tiết một review
     public function show($id)
-    {
-        $review = Review::find($id);
+{
+    $review = Review::with('product')->find($id);
 
-        if (!$review) {
-            return response()->json(['message' => 'Không tìm thấy đánh giá'], 404);
-        }
-
-        return response()->json($review, 200);
+    if (!$review) {
+        return response()->json(['message' => 'Không tìm thấy đánh giá'], 404);
     }
+
+    return new ReviewResource($review);
+}
+
 
     // Tạo mới một review
 

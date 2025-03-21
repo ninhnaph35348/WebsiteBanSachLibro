@@ -66,7 +66,7 @@ Route::middleware(['auth:sanctum',  'role:s.admin|admin'])->group(function () {
         Route::get('/{id}', [CategoryController::class, 'show']);
         Route::post('/', [CategoryController::class, 'store']);
         Route::put('/edit/{id}', [CategoryController::class, 'update']);
-        Route::delete('/{id}', [CategoryController::class, 'destroy']);
+        Route::put('/{id}', [CategoryController::class, 'destroy']);
     });
     Route::prefix('authors')->group(function () {
         Route::get('/', [AuthorController::class, 'index']);

@@ -56,7 +56,7 @@ Route::middleware(['auth:sanctum',  'role:s.admin'])->group(function () {
         Route::get('/{id}', [UserController::class, 'show']);
         Route::post('/', [UserController::class, 'store']);
         Route::put('/edit/{id}', [UserController::class, 'update']);
-        Route::delete('/{id}', [UserController::class, 'destroy']);
+        Route::put('/{id}', [UserController::class, 'destroy']);
     });
 });
 // Routes cho cả Admin và Super Admin (Quản lý tất cả trừ users)

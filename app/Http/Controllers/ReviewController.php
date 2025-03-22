@@ -94,16 +94,20 @@ class ReviewController extends Controller
 
 
     public function hidden($id)
-    {
-        $review = Review::find($id);
+{
+    $review = Review::find($id);
 
-        if (!$review) {
-            return response()->json(['message' => 'Không tìm thấy đánh giá'], 404);
-        }
-
-        // $review->delete();
-        $review->update(['del_flg' => 1]);
-
-        return response()->json(['message' => 'Ẩn bình luận thành công'], 200);
+    if (!$review) {
+        return response()->json(['message' => 'Không tìm thấy đánh giá'], 404);
     }
+
+    // Nếu đang ẩn (del_flg = 1) thì hiển thị lại (del_flg = 0), ngược lại thì ẩn đi (del_flg = 1)
+    $newStatus = $review->del_flg == 1 ? 0 : 1;
+    $review->update(['del_flg' => $newStatus]);
+
+    $message = $newStatus == 1 ? 'Ẩn bình luận thành công' : 'Hiển thị bình luận thành công';
+
+    return response()->json(['message' => $message, 'status' => $newStatus], 200);
+}
+
 }

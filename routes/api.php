@@ -219,6 +219,7 @@ Route::prefix('reviews')->group(function () {
     Route::put('/edit/{id}', [ReviewController::class, 'update']);
     Route::delete('/{id}', [ReviewController::class, 'destroy']);
     Route::put('/hidden/{id}', [ReviewController::class, 'hidden']);
+
 });
 
 Route::prefix('orders')->group(function () {

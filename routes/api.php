@@ -6,6 +6,7 @@ use App\Http\Controllers\UserController;
 use App\Http\Controllers\AuthorController;
 use App\Http\Controllers\CartController;
 use App\Http\Controllers\CategoryController;
+use App\Http\Controllers\CoverController;
 use App\Http\Controllers\GenreController;
 use App\Http\Controllers\LanguageController;
 use App\Http\Controllers\ProductController;
@@ -76,11 +77,11 @@ Route::middleware(['auth:sanctum',  'role:s.admin|admin'])->group(function () {
         Route::put('/{id}', [AuthorController::class, 'destroy']);
     });
     Route::prefix('covers')->group(function () {
-        Route::get('/', [AuthorController::class, 'index']);
-        Route::get('/{id}', [AuthorController::class, 'show']);
-        Route::post('/', [AuthorController::class, 'store']);
-        Route::put('/edit/{id}', [AuthorController::class, 'update']);
-        Route::put('/{id}', [AuthorController::class, 'destroy']);
+        Route::get('/', [CoverController::class, 'index']);
+        Route::get('/{id}', [CoverController::class, 'show']);
+        Route::post('/', [CoverController::class, 'store']);
+        Route::put('/edit/{id}', [CoverController::class, 'update']);
+        Route::put('/{id}', [CoverController::class, 'destroy']);
     });
     Route::prefix('languages')->group(function () {
         Route::get('/', [LanguageController::class, 'index']);
@@ -142,12 +143,34 @@ Route::middleware(['auth:sanctum',  'role:s.admin|admin'])->group(function () {
     });
     Route::get('status', [OrderStatusController::class, 'getAllOrderStatus']);
 });
+// Get All
+Route::get('users/', [UserController::class, 'index']);
+Route::get('categories/', [CategoryController::class, 'index']);
+Route::get('covers/', [CoverController::class, 'index']);
+Route::get('authors/', [AuthorController::class, 'index']);
+Route::get('languages/', [LanguageController::class, 'index']);
+Route::get('publishers/', [PublisherController::class, 'index']);
+Route::get('genres/', [GenreController::class, 'index']);
+Route::get('products/', [ProductController::class, 'index']);
+Route::get('product_variants/', [ProductVariantController::class, 'index']);
+Route::get('orders/', [OrderController::class, 'index']);
+Route::get('reviews/', [VoucherController::class, 'index']);
+// Get Detail
+Route::get('users/{id}', [UserController::class, 'show']);
+Route::get('categories/{id}', [CategoryController::class, 'show']);
+Route::get('covers/{id}', [AuthorController::class, 'show']);
+Route::get('authors/{id}', [AuthorController::class, 'show']);
+Route::get('languages/{id}', [LanguageController::class, 'show']);
+Route::get('publishers/{id}', [PublisherController::class, 'show']);
+Route::get('genres/{id}', [GenreController::class, 'show']);
+Route::get('products/{id}', [ProductController::class, 'show']);
+Route::get('product_variants/{id}', [ProductVariantController::class, 'show']);
+Route::get('orders/{id}', [OrderController::class, 'show']);
+Route::get('reviews/{id}', [VoucherController::class, 'show']);
 
+// All 
 Route::post('carts/order/checkout', [CartController::class, 'checkout']);
 Route::get('orders/status', [OrderStatusController::class, 'getAllOrderStatus']);
 Route::get('products/latest', [ProductController::class, 'latest']);
 Route::get('products/search', [ProductController::class, 'search']);
 Route::get('products/filter', [ProductController::class, 'product_filtering']);
-
-
-

@@ -158,7 +158,7 @@ Route::get('reviews/', [VoucherController::class, 'index']);
 // Get Detail
 Route::get('users/{id}', [UserController::class, 'show']);
 Route::get('categories/{id}', [CategoryController::class, 'show']);
-Route::get('covers/{id}', [AuthorController::class, 'show']);
+Route::get('covers/{id}', [CoverController::class, 'show']);
 Route::get('authors/{id}', [AuthorController::class, 'show']);
 Route::get('languages/{id}', [LanguageController::class, 'show']);
 Route::get('publishers/{id}', [PublisherController::class, 'show']);

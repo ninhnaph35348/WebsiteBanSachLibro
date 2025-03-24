@@ -168,7 +168,7 @@ Route::get('product_variants/{id}', [ProductVariantController::class, 'show']);
 Route::get('orders/{id}', [OrderController::class, 'show']);
 Route::get('reviews/{id}', [VoucherController::class, 'show']);
 
-// All 
+// All
 Route::post('carts/order/checkout', [CartController::class, 'checkout']);
 Route::get('orders/status', [OrderStatusController::class, 'getAllOrderStatus']);
 Route::get('products/latest', [ProductController::class, 'latest']);

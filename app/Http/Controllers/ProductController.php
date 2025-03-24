@@ -19,7 +19,7 @@ class ProductController extends Controller
     {
         $products = Product::with('author', 'publisher', 'language', 'category', 'genres', 'images')
             ->where('del_flg', 0)
-            ->get();
+            ->paginate(10);
 
         return ProductResource::collection($products);
     }

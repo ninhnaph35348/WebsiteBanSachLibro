@@ -14,6 +14,7 @@ class Kernel extends HttpKernel
      * @var array<int, class-string|string>
      */
     protected $routeMiddleware = [
+        'optional-auth' => \App\Http\Middleware\OptionalAuth::class,
         'auth' => \App\Http\Middleware\Authenticate::class,
         'auth:sanctum' => \Laravel\Sanctum\Http\Middleware\EnsureFrontendRequestsAreStateful::class,
         'role' => \App\Http\Middleware\RoleMiddleware::class,

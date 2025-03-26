@@ -21,7 +21,7 @@ class OrderResource extends JsonResource
             'user_address' => $this->user_address,
             'status' => $this->status ? $this->status->name : null,
             'voucher' => $this->voucher ? $this->voucher->code : null,
-            'user' => $this->user ? $this->user->name : null,
+            'user' => $this->user ? $this->user->username : null,
             // 'order_details' => OrderDetailResource::collection($this->orderDetails),
         ];
     }

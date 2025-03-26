@@ -45,13 +45,12 @@ class ProductVariantController extends Controller
      */
     public function show(string $id)
     {
-        $variant = ProductVariant::find($id);
+        $variant = ProductVariant::with(['product', 'cover'])->find($id);
         if (!$variant) {
             return response()->json(['message' => 'Không tồn tại'], 404);
         }
-        return response()->json($variant);
+        return new VariantResoure($variant);
     }
-
     /**
      * Update the specified resource in storage.
      */

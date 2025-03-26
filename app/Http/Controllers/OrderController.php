@@ -17,7 +17,7 @@ class OrderController extends Controller
     // Lấy danh sách đơn hàng
     public function index()
     {
-        $orders = Order::with(['status', 'voucher', 'user'])->get();
+        $orders = Order::with(['status', 'voucher', 'user'])->paginate(10);
 
         return OrderResource::collection($orders);
     }

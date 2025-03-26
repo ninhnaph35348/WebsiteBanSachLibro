@@ -8,6 +8,7 @@ use App\Models\Order;
 use App\Models\OrderDetail;
 use App\Models\Voucher;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Str;
 
 class CartController extends Controller
@@ -23,7 +24,7 @@ class CartController extends Controller
                 'cart.*.quantity' => 'required|integer|min:1',
                 'note' => 'nullable|string',
                 'payment_method' => 'required',
-                'voucher_id' => 'nullable|integer|exists:vouchers,id',
+                'voucher_code' => 'nullable|string|exists:vouchers,code',
                 'shipping_fee' => 'nullable|numeric|min:0',
                 'user_name' => 'nullable|string|max:255',
                 'user_email' => 'nullable|email|max:255',
@@ -67,32 +68,56 @@ class CartController extends Controller
 
             // Áp dụng voucher (nếu có)
             $discount = 0;
-            if ($request->voucher_id) {
-                $voucher = Voucher::find($request->voucher_id);
+            $voucherId = null;
+
+            if ($request->voucher_code) {
+                $voucher = Voucher::where('code', $request->voucher_code)
+                    ->where('valid_from', '<=', now()) // Voucher có hiệu lực
+                    ->where('valid_to', '>=', now()) // Chưa hết hạn
+                    ->first();
+
                 if ($voucher) {
-                    $discount = $voucher->discount_amount;
+                    $discount = $voucher->discount;
+                    $voucherId = $voucher->id; // Lưu voucher_id để lưu vào đơn hàng
+                } else {
+                    return response()->json(['message' => 'Mã giảm giá không hợp lệ hoặc đã hết hạn!'], 400);
                 }
             }
 
-            // Tính tổng tiền đơn hàng
+            // Tính tổng tiền sau khi áp dụng giảm giá
             $totalPrice = max(0, $totalProductPrice + $shippingFee - $discount);
 
-            // Tạo đơn hàng
-            $order = Order::create([
+            // Kiểm tra người dùng có đăng nhập không
+            $userId = auth()->check() ? auth()->id() : null;
+
+            // Nếu đã đăng nhập, lấy thông tin user từ hệ thống, nếu không thì lấy từ request
+            $orderData = [
                 'code_order' => $codeOrder,
                 'total_price' => $totalPrice,
                 'note' => $request->note,
-                'order_status_id' => 1, // Mặc định = 1 (Chờ xác nhận)
+                'order_status_id' => 1,
                 'payment_method' => $request->payment_method,
-                'voucher_id' => $request->voucher_id,
-                'user_id' => auth()->id(),
-                'user_name' => $request->user_name,
-                'user_email' => $request->user_email,
-                'user_phone' => $request->user_phone,
-                'user_address' => $request->user_address,
-            ]);
+                'voucher_id' => $voucherId,
+                'user_id' => $userId,
+            ];
 
-            // Lưu chi tiết đơn hàng
+            if ($userId) {
+                // Nếu user đăng nhập, chỉ lưu nếu FE gửi thông tin
+                $orderData['user_name'] = $request->user_name ?? auth()->user()->username;
+                $orderData['user_email'] = $request->user_email ?? auth()->user()->email;
+                $orderData['user_phone'] = $request->user_phone ?? auth()->user()->phone;
+                $orderData['user_address'] = $request->user_address ?? auth()->user()->address;
+            } else {
+                // Nếu user không đăng nhập, lưu thông tin từ request
+                $orderData['user_name'] = $request->user_name;
+                $orderData['user_email'] = $request->user_email;
+                $orderData['user_phone'] = $request->user_phone;
+                $orderData['user_address'] = $request->user_address;
+            }
+
+            // Tạo đơn hàng
+            $order = Order::create($orderData);
+
             foreach ($orderDetails as &$detail) {
                 $detail['order_id'] = $order->id;
             }

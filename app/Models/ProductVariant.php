@@ -16,16 +16,16 @@ class ProductVariant extends Model
         'quantity',
         'price',
         'promotion',
-        'del_flg', 
+        'del_flg',
         'cover_id',
         'promotion'
-        ];
+    ];
 
     public function cover()
     {
-        return $this->belongsTo(Cover::class, 'cover_id');
+        return $this->belongsTo(Cover::class, 'cover_id', 'id');
     }
-    
+
     public function product()
     {
         return $this->belongsTo(Product::class, 'product_id', 'id');

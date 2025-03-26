@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Resources\VariantResoure;
 use App\Models\ProductVariant;
 use Illuminate\Http\Request;
 
@@ -12,8 +13,10 @@ class ProductVariantController extends Controller
      */
     public function index()
     {
-        $products = ProductVariant::all()->where('del_flg', 0);
-        return response()->json($products);
+        $products = ProductVariant::with(['product', 'cover'])
+            ->where('del_flg', 0)
+            ->paginate(10);
+        return VariantResoure::collection($products);
     }
 
     /**

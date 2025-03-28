@@ -24,7 +24,7 @@ class ProductController extends Controller
         return ProductResource::collection($products);
     }
 
-    public function product_filtering(Request $request, $category_id = null)
+    public function product_filtering(Request $request)
     {
         $query = Product::with('author', 'publisher', 'language', 'category', 'genres', 'images', 'variants.cover')
             ->where('del_flg', 0);

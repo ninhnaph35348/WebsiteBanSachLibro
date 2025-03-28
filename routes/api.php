@@ -154,7 +154,7 @@ Route::get('genres/', [GenreController::class, 'index']);
 Route::get('products/', [ProductController::class, 'index']);
 Route::get('product_variants/', [ProductVariantController::class, 'index']);
 Route::get('orders/', [OrderController::class, 'index']);
-Route::get('reviews/', [VoucherController::class, 'index']);
+Route::get('reviews/', [ReviewController::class, 'index']);
 // Get Detail
 Route::get('users/{id}', [UserController::class, 'show']);
 Route::get('categories/{id}', [CategoryController::class, 'show']);
@@ -166,7 +166,7 @@ Route::get('genres/{id}', [GenreController::class, 'show']);
 Route::get('products/{id}', [ProductController::class, 'show']);
 Route::get('product_variants/{id}', [ProductVariantController::class, 'show']);
 Route::get('orders/{id}', [OrderController::class, 'show']);
-Route::get('reviews/{id}', [VoucherController::class, 'show']);
+Route::get('reviews/{id}', [ReviewController::class, 'show']);
 
 // All
 Route::middleware('optional-auth')->post('carts/order/checkout', [CartController::class, 'checkout']);

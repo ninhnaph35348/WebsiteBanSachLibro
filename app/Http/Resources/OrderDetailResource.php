@@ -17,7 +17,7 @@ class OrderDetailResource extends JsonResource
                 'user' => $this->order->user ? $this->order->user->name : null,
                 'total' => $this->order->total,
                 'voucher' => $this->order->voucher ? $this->order->voucher->code : null,
-                'created_at' => $this->order->created_at,
+                'created_at' => $this->created_at->format('Y-m-d H:i:s'),
             ] : null,
             'product_variant_id' => $this->product_variant_id ? [
                 'quantity' => $this->productVariant->quantity,

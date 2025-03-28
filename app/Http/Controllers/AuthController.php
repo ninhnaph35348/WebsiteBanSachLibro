@@ -1,10 +1,12 @@
 <?php
 
 namespace App\Http\Controllers;
+
 use App\Models\User;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Validator;
 //
 class AuthController extends Controller
@@ -57,11 +59,52 @@ class AuthController extends Controller
             return response()->json(['message' => $validator->errors()], 400);
         }
 
-        if (!Auth::attempt($request->only('email', 'password'))) {
+        $user = User::where('email', $request->email)->first();
+
+        if (!$user) {
             return response()->json(['message' => 'Email hoặc mật khẩu không chính xác'], 401);
         }
 
-        $user = Auth::user();
+        // Kiểm tra nếu tài khoản bị khóa
+        if ($user->status === 'inactive') {
+            return response()->json([
+                'message' => 'Tài khoản của bạn đã bị khóa do nhập sai quá nhiều lần.',
+                'status' => 'inactive'
+            ], 403);
+        }
+
+        if (!Auth::attempt($request->only('email', 'password'))) {
+            $user->failed_attempts += 1;
+
+            // Khóa tài khoản nếu sai quá 5 lần
+            if ($user->failed_attempts >= 5) {
+                $user->status = 'inactive';
+                $user->save();
+
+                // Ghi log khóa tài khoản
+                DB::table('logs')->insert([
+                    'message' => "Tài khoản {$user->email} bị khóa do nhập sai quá nhiều lần",
+                    'created_at' => now(),
+                ]);
+
+                return response()->json([
+                    'message' => 'Tài khoản của bạn đã bị khóa do nhập sai quá nhiều lần.',
+                    'status' => 'inactive',
+                    'failed_attempts' => $user->failed_attempts
+                ], 403);
+            }
+
+            $user->save();
+            return response()->json([
+                'message' => 'Email hoặc mật khẩu không chính xác',
+                'failed_attempts' => $user->failed_attempts
+            ], 401);
+        }
+
+        // Reset lại failed_attempts nếu đăng nhập thành công
+        $user->failed_attempts = 0;
+        $user->save();
+
         $token = $user->createToken('auth_token')->plainTextToken;
 
         return response()->json([
@@ -71,6 +114,8 @@ class AuthController extends Controller
             'token' => $token
         ], 200);
     }
+
+
 
 
     // Đăng xuất

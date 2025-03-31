@@ -41,6 +41,8 @@ Route::post('/register', [AuthController::class, 'register']);
 Route::get('/login', [AuthController::class, 'login_'])->name('login');
 Route::post('/login', [AuthController::class, 'login']);
 Route::middleware(['auth:sanctum'])->group(function () {
+    Route::get('/profile', [AuthController::class, 'profile']);
+    Route::put('update-profile', [AuthController::class, 'updateProfile']);
     Route::put('change-password', [AuthController::class, 'changePassword']);
     Route::post('/logout', [AuthController::class, 'logout']);
     Route::get('/order_detail', [OrderDetailController::class, 'index']);

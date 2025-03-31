@@ -114,6 +114,69 @@ class AuthController extends Controller
             'token' => $token
         ], 200);
     }
+    // Lấy thông tin cá nhân user
+    public function profile(Request $request)
+    {
+        // Lấy thông tin user từ token
+        $user = Auth::user();
+
+        if (!$user) {
+            return response()->json(['message' => 'Unauthorized'], 401);
+        }
+
+        return response()->json([
+            'message' => 'Lấy thông tin thành công',
+            'user' => $user
+        ], 200);
+    }
+
+    public function updateProfile(Request $request)
+    {
+        // Lấy thông tin user từ token
+        $user = Auth::guard('sanctum')->user();
+
+        if (!$user) {
+            return response()->json(['message' => 'Unauthorized'], 401);
+        }
+
+        // Validate dữ liệu
+        $validator = Validator::make($request->all(), [
+            'username' => 'nullable|string|max:255|unique:users,username,' . $user->id,
+            'fullname' => 'nullable|string|max:255',
+            'email' => 'nullable|string|email|max:255|unique:users,email,' . $user->id,
+            'avatar' => 'nullable|image|mimes:jpg,jpeg,png|max:2048',
+            'phone' => 'nullable|string|min:10|max:15' . $user->id,
+            'address' => 'nullable|string|max:500',
+            'birth_date' => 'nullable|date',
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json(['message' => $validator->errors()], 400);
+        }
+
+        // Cập nhật thông tin user
+        $data = [
+            'fullname' => $request->fullname ?? $user->fullname,
+            'email' => $request->email ?? $user->email,
+            'phone' => $request->phone ?? $user->phone,
+            'address' => $request->address ?? $user->address,
+            'birth_date' => $request->birth_date ?? $user->birth_date,
+        ];
+
+        // Xử lý avatar nếu có tải lên
+        if ($request->hasFile('avatar')) {
+            $avatarPath = $request->file('avatar')->store('avatars', 'public');
+            $data['avatar'] = $avatarPath;
+        }
+
+        $user->update($data);
+
+        return response()->json([
+            'message' => 'Cập nhật thông tin thành công',
+            'user' => $user
+        ], 200);
+    }
+
 
     // Đổi mật khẩu
     public function changePassword(Request $request)

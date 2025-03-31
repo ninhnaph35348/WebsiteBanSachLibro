@@ -41,6 +41,9 @@ Route::post('/register', [AuthController::class, 'register']);
 Route::get('/login', [AuthController::class, 'login_'])->name('login');
 Route::post('/login', [AuthController::class, 'login']);
 Route::middleware(['auth:sanctum'])->group(function () {
+    Route::get('/profile', [AuthController::class, 'profile']);
+    Route::put('/update-profile', [AuthController::class, 'updateProfile']);
+    Route::put('/change-password', [AuthController::class, 'changePassword']);
     Route::post('/logout', [AuthController::class, 'logout']);
     Route::get('/order_detail', [OrderDetailController::class, 'index']);
     Route::get('/order_detail/{code_order}', [OrderDetailController::class, 'show']);
@@ -106,7 +109,6 @@ Route::middleware(['auth:sanctum',  'role:s.admin|admin'])->group(function () {
     });
     Route::prefix('products')->group(function () {
         Route::get('/', [ProductController::class, 'index']);
-        Route::get('/latest', [ProductController::class, 'latest']);
         Route::get('/search', [ProductController::class, 'search']);
         Route::get('/filter', [ProductController::class, 'product_filtering']);
         Route::get('/{id}', [ProductController::class, 'show']);
@@ -115,6 +117,7 @@ Route::middleware(['auth:sanctum',  'role:s.admin|admin'])->group(function () {
         Route::put('/{id}', [ProductController::class, 'destroy']);
     });
     Route::prefix('product_variants')->group(function () {
+        Route::get('/latest', [ProductController::class, 'latest']);
         Route::get('/', [ProductVariantController::class, 'index']);
         Route::get('/{id}', [ProductVariantController::class, 'show']);
         Route::post('/', [ProductVariantController::class, 'store']);
@@ -167,11 +170,10 @@ Route::get('products/{id}', [ProductController::class, 'show']);
 Route::get('product_variants/{id}', [ProductVariantController::class, 'show']);
 Route::get('orders/{id}', [OrderController::class, 'show']);
 Route::get('reviews/{id}', [ReviewController::class, 'show']);
-
 // All
 Route::middleware('optional-auth')->post('carts/order/checkout', [CartController::class, 'checkout']);
 
 Route::get('orders/status', [OrderStatusController::class, 'getAllOrderStatus']);
-Route::get('products/latest', [ProductController::class, 'latest']);
+Route::get('product_variants/latest', [ProductController::class, 'latest']);
 Route::get('products/search', [ProductController::class, 'search']);
 Route::get('products/filter', [ProductController::class, 'product_filtering']);

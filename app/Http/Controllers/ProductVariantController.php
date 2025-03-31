@@ -43,13 +43,19 @@ class ProductVariantController extends Controller
     /**
      * Display the specified resource.
      */
-    public function show(string $id)
+    public function show(string $code)
     {
-        $variant = ProductVariant::with(['product', 'cover'])->find($id);
-        if (!$variant) {
+        $variants = ProductVariant::with(['product', 'cover'])
+            ->whereHas('product', function ($query) use ($code) {
+                $query->where('code', $code);
+            })
+            ->get();
+
+        if ($variants->isEmpty()) {
             return response()->json(['message' => 'Không tồn tại'], 404);
         }
-        return new VariantResoure($variant);
+
+        return VariantResoure::collection($variants);
     }
     /**
      * Update the specified resource in storage.

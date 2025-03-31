@@ -41,6 +41,7 @@ Route::post('/register', [AuthController::class, 'register']);
 Route::get('/login', [AuthController::class, 'login_'])->name('login');
 Route::post('/login', [AuthController::class, 'login']);
 Route::middleware(['auth:sanctum'])->group(function () {
+    Route::put('change-password', [AuthController::class, 'changePassword']);
     Route::post('/logout', [AuthController::class, 'logout']);
     Route::get('/order_detail', [OrderDetailController::class, 'index']);
     Route::get('/order_detail/{code_order}', [OrderDetailController::class, 'show']);
@@ -167,7 +168,6 @@ Route::get('products/{id}', [ProductController::class, 'show']);
 Route::get('product_variants/{id}', [ProductVariantController::class, 'show']);
 Route::get('orders/{id}', [OrderController::class, 'show']);
 Route::get('reviews/{id}', [ReviewController::class, 'show']);
-
 // All
 Route::middleware('optional-auth')->post('carts/order/checkout', [CartController::class, 'checkout']);
 

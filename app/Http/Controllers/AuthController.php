@@ -115,6 +115,39 @@ class AuthController extends Controller
         ], 200);
     }
 
+    // Đổi mật khẩu
+    public function changePassword(Request $request)
+    {
+        // Lấy user từ token
+        $user = Auth::user();
+
+        if (!$user) {
+            return response()->json(['message' => 'Unauthorized'], 401);
+        }
+
+        // Validate dữ liệu đầu vào
+        $validator = Validator::make($request->all(), [
+            'old_password' => 'required|string|min:6',
+            'new_password' => 'required|string|min:6|same:confirm_new_password',
+            'confirm_new_password' => 'required|string|min:6'
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json(['message' => $validator->errors()], 400);
+        }
+
+        // Kiểm tra mật khẩu cũ có đúng không
+        if (!Hash::check($request->old_password, $user->password)) {
+            return response()->json(['message' => 'Mật khẩu cũ không chính xác'], 401);
+        }
+
+        // Cập nhật mật khẩu mới
+        $user->password = Hash::make($request->new_password);
+        $user->save();
+
+        return response()->json(['message' => 'Đổi mật khẩu thành công'], 200);
+    }
+
 
 
 

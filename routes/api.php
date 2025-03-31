@@ -109,7 +109,6 @@ Route::middleware(['auth:sanctum',  'role:s.admin|admin'])->group(function () {
     });
     Route::prefix('products')->group(function () {
         Route::get('/', [ProductController::class, 'index']);
-        Route::get('/latest', [ProductController::class, 'latest']);
         Route::get('/search', [ProductController::class, 'search']);
         Route::get('/filter', [ProductController::class, 'product_filtering']);
         Route::get('/{id}', [ProductController::class, 'show']);
@@ -118,6 +117,7 @@ Route::middleware(['auth:sanctum',  'role:s.admin|admin'])->group(function () {
         Route::put('/{id}', [ProductController::class, 'destroy']);
     });
     Route::prefix('product_variants')->group(function () {
+        Route::get('/latest', [ProductController::class, 'latest']);
         Route::get('/', [ProductVariantController::class, 'index']);
         Route::get('/{id}', [ProductVariantController::class, 'show']);
         Route::post('/', [ProductVariantController::class, 'store']);
@@ -174,6 +174,6 @@ Route::get('reviews/{id}', [ReviewController::class, 'show']);
 Route::middleware('optional-auth')->post('carts/order/checkout', [CartController::class, 'checkout']);
 
 Route::get('orders/status', [OrderStatusController::class, 'getAllOrderStatus']);
-Route::get('products/latest', [ProductController::class, 'latest']);
+Route::get('product_variants/latest', [ProductController::class, 'latest']);
 Route::get('products/search', [ProductController::class, 'search']);
 Route::get('products/filter', [ProductController::class, 'product_filtering']);

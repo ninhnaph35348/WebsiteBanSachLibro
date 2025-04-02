@@ -50,8 +50,13 @@ Route::middleware(['auth:sanctum'])->group(function () {
 });
 
 Route::middleware('auth:sanctum')->get('/me', function (Request $request) {
+
+
+
     return response()->json(['user' => $request->user()]);
 });
+Route::middleware('auth:sanctum')->put('/me', [UserController::class, 'updateMe']);
+
 
 // Routes cho Super Admin (Toàn quyền, bao gồm quản lý users)
 Route::middleware(['auth:sanctum',  'role:s.admin'])->group(function () {

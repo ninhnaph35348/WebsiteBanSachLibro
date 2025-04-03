@@ -3,9 +3,11 @@
 namespace App\Http\Controllers;
 
 use App\Http\Resources\ProductResource;
+use App\Http\Resources\VariantResoure;
 use App\Models\Genre;
 use App\Models\Product;
 use App\Models\ProductGenre;
+use App\Models\ProductVariant;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
@@ -257,8 +259,13 @@ class ProductController extends Controller
 
     public function latest()
     {
-        $products = Product::orderBy('created_at', 'desc')->take(10)->get();
-        return response()->json($products);
+        $products = ProductVariant::with(['product', 'cover'])
+            ->where('del_flg', 0)
+            ->orderBy('created_at', 'desc') // Sắp xếp theo ngày tạo mới nhất
+            ->take(10)
+            ->get(); // Loại bỏ đối số không hợp lệ trong get()
+
+        return VariantResoure::collection($products);
     }
     public function search(Request $request)
     {

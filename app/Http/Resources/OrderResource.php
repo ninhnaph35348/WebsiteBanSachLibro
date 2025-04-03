@@ -14,7 +14,7 @@ class OrderResource extends JsonResource
             'code_order' => $this->code_order,
             'total_price' => $this->total_price,
             'note' => $this->note,
-            'payment_method' => $this->payment_method,
+            'payment_method' => $this->getPaymentMethodName(),
             'user_name' => $this->user_name,
             'user_email' => $this->user_email,
             'user_phone' => $this->user_phone,
@@ -22,8 +22,16 @@ class OrderResource extends JsonResource
             'status' => $this->status ? $this->status->name : null,
             'voucher' => $this->voucher ? $this->voucher->code : null,
             'user' => $this->user ? $this->user->username : null,
-            'ceated_at' => $this->created_at->format('Y-m-d H:i:s'),
+            'created_at' => $this->created_at->format('Y-m-d H:i:s'),
             // 'order_details' => OrderDetailResource::collection($this->orderDetails),
         ];
+    }
+    private function getPaymentMethodName()
+    {
+        return match ($this->payment_method) {
+            0 => 'COD',
+            1 => 'Ví Momo',
+            default => 'Không xác định',
+        };
     }
 }

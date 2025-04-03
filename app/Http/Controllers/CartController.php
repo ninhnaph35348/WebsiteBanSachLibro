@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Resources\OrderResource;
 use Illuminate\Http\Request;
 use App\Models\ProductVariant;
 use App\Models\Order;
@@ -56,7 +57,7 @@ class CartController extends Controller
                 $orderDetails[] = [
                     'product_variant_id' => $variant->id,
                     'quantity' => $item['quantity'],
-                    'price' => $price,
+                    'price' => $subtotal,
                 ];
 
                 // Trừ số lượng tồn kho
@@ -127,8 +128,9 @@ class CartController extends Controller
 
             return response()->json([
                 'message' => 'Đặt hàng thành công!',
-                'order' => $order,
-                'order_details' => $orderDetails
+                'total_price_cart' => $totalPrice,
+                'order' => new OrderResource($order),
+                'order_details' => $orderDetails,
             ], 201);
         } catch (\Exception $e) {
             DB::rollBack();

@@ -58,6 +58,22 @@ class ProductVariantController extends Controller
 
         return VariantResoure::collection($variants);
     }
+
+    public function getByProductAndCover(string $code, int $cover_id)
+    {
+        $variant = ProductVariant::with(['product', 'cover'])
+            ->whereHas('product', function ($query) use ($code): void {
+                $query->where('code', $code);
+            })
+            ->where('cover_id', $cover_id)
+            ->first();
+
+        if (!$variant) {
+            return response()->json(['message' => "Không tìm thấy biến thể $cover_id của sản phẩm : $code"], 404);
+        }
+
+        return new VariantResoure($variant);
+    }
     /**
      * Update the specified resource in storage.
      */

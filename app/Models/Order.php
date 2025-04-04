@@ -23,6 +23,9 @@ class Order extends Model
         'user_email',
         'user_phone',
         'user_address',
+        'shipping_name',
+        'shipping_phone',
+        'shipping_address',
     ];
 
     // Liên kết với OrderStatus
@@ -48,4 +51,5 @@ class Order extends Model
     {
         return $this->hasMany(OrderDetail::class, 'order_id');
     }
+
 }

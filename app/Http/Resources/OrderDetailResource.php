@@ -11,27 +11,24 @@ class OrderDetailResource extends JsonResource
     {
         return [
             'id' => $this->id,
-            'order_id' => $this->order_id ? [
+            'order_id' => [
                 'code_order' => $this->order->code_order,
                 'order_status' => $this->order->status ? $this->order->status->name : null,
-                'user' => $this->order->user ? $this->order->user->name : null,
                 'total' => $this->order->total,
-                'voucher' => $this->order->voucher ? $this->order->voucher->code : null,
-                'created_at' => $this->created_at->format('Y-m-d H:i:s'),
-            ] : null,
-            'product_variant_id' => $this->product_variant_id ? [
+                'created_at' => $this->order->created_at->format('Y-m-d H:i:s'),
+            ],
+            'product_variant' => [
                 'quantity' => $this->productVariant->quantity,
                 'price' => $this->productVariant->price,
                 'promotion' => $this->productVariant->promotion,
-                'cover' => $this->productVariant->cover ? $this->productVariant->cover->type : null,
                 'product' => $this->productVariant->product ? [
                     'code' => $this->productVariant->product->code,
                     'title' => $this->productVariant->product->title,
                     'image' => $this->productVariant->product->image,
                 ] : null,
-            ] : null,
+            ],
             'quantity' => $this->quantity,
-            'price' => $this->price,
+            'total_line' => $this->total_line,
         ];
     }
 }

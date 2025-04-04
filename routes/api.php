@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\AdminOrderDetailController;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\ProductVariantController;
 use App\Http\Controllers\UserController;
@@ -127,7 +128,7 @@ Route::middleware(['auth:sanctum',  'role:s.admin|admin'])->group(function () {
     });
     Route::prefix('orders')->group(function () {
         Route::get('/', [OrderController::class, 'index']);
-        Route::get('/{id}', [OrderController::class, 'show']);
+        Route::get('/order-detail/{code_order}', [AdminOrderDetailController::class, 'show']);
         Route::put('/edit/{id}', [OrderController::class, 'update']);
     });
     Route::prefix('vouchers')->group(function () {

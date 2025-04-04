@@ -13,6 +13,7 @@ class CategoryController extends Controller
      */
     public function index()
     {
+        // $categories = Category::where('del_flg', 0)->paginate(10);
         $categories = Category::all();
         return response()->json($categories);
     }

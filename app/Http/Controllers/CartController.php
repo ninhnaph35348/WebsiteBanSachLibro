@@ -89,8 +89,7 @@ class CartController extends Controller
             $totalPrice = max(0, $totalProductPrice + $shippingFee - $discount);
 
             // Kiểm tra người dùng có đăng nhập không
-            $userId = auth()->check() ? auth()->id() : null;
-
+            $user = auth('api')->user();
             // Nếu đã đăng nhập, lấy thông tin user từ hệ thống, nếu không thì lấy từ request
             $orderData = [
                 'code_order' => $codeOrder,
@@ -99,15 +98,15 @@ class CartController extends Controller
                 'order_status_id' => 1,
                 'payment_method' => $request->payment_method,
                 'voucher_id' => $voucherId,
-                'user_id' => $userId,
+                'user_id' => $user ? $user->id : null, // Lưu user_id nếu đã đăng nhập
             ];
 
-            if ($userId) {
+            if ($user) {
                 // Nếu user đăng nhập, chỉ lưu nếu FE gửi thông tin
-                $orderData['user_name'] = $request->user_name ?? auth()->user()->username;
-                $orderData['user_email'] = $request->user_email ?? auth()->user()->email;
-                $orderData['user_phone'] = $request->user_phone ?? auth()->user()->phone;
-                $orderData['user_address'] = $request->user_address ?? auth()->user()->address;
+                $orderData['user_name'] = $request->user_name ?? $user->username;
+                $orderData['user_email'] = $request->user_email ?? $user->email;
+                $orderData['user_phone'] = $request->user_phone ?? $user->phone;
+                $orderData['user_address'] = $request->user_address ?? $user->address;
             } else {
                 // Nếu user không đăng nhập, lưu thông tin từ request
                 $orderData['user_name'] = $request->user_name;

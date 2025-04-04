@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\ProductVariantController;
+use App\Http\Controllers\StatisticsController;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\AuthorController;
 use App\Http\Controllers\CartController;
@@ -177,3 +178,17 @@ Route::get('orders/status', [OrderStatusController::class, 'getAllOrderStatus'])
 Route::get('product_variants/latest', [ProductController::class, 'latest']);
 Route::get('products/search', [ProductController::class, 'search']);
 Route::get('products/filter', [ProductController::class, 'product_filtering']);
+
+
+// Thống kê
+Route::prefix('statistics')->group(function () {
+    Route::get('total-books', [StatisticsController::class, 'getTotalBooks']);
+    Route::get('sold-books', [StatisticsController::class, 'getSoldBooks']);
+    Route::get('in-stock', [StatisticsController::class, 'getInStock']);
+    Route::get('total-revenue', [StatisticsController::class, 'getTotalRevenue']);
+    Route::get('revenue-by-period', [StatisticsController::class, 'getRevenueByPeriod']);
+    Route::get('best-sellers', [StatisticsController::class, 'getBestSellers']);
+    Route::get('customers', [StatisticsController::class, 'getCustomerCount']);
+    Route::get('total-reviews', [StatisticsController::class, 'getTotalReviews']);
+    Route::get('orders-by-status', [StatisticsController::class, 'getOrdersByStatus']);
+});

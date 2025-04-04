@@ -181,3 +181,4 @@ Route::get('products/search', [ProductController::class, 'search']);
 Route::get('products/filter', [ProductController::class, 'product_filtering']);
 Route::get('/product_variants/{code}/cover/{cover_id}', [ProductVariantController::class, 'getByProductAndCover']);
 Route::get('/products-bestsellers', [ProductController::class, 'bestSellers']);
+// Route::get('/order_detail/{code_order}', [OrderDetailController::class, 'show']);

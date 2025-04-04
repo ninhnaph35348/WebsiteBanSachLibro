@@ -16,9 +16,24 @@ class OptionalAuth
         if ($token) {
             // Tìm token trong bảng personal_access_tokens
             $accessToken = PersonalAccessToken::findToken($token);
+
             if ($accessToken) {
+                // Kiểm tra xem token có hết hạn không
+                if ($accessToken->expires_at && $accessToken->expires_at->isPast()) {
+                    // Token đã hết hạn
+                    return response()->json(['message' => 'Token đã hết hạn'], 401);
+                }
+
+                // Kiểm tra xem token có được sử dụng bởi người dùng hợp lệ không
+                if (!$accessToken->tokenable) {
+                    return response()->json(['message' => 'User không hợp lệ'], 401);
+                }
+
                 // Gán user vào request (tương tự auth()->user())
-                $request->setUserResolver(fn () => $accessToken->tokenable);
+                $request->setUserResolver(fn() => $accessToken->tokenable);
+            } else {
+                // Token không hợp lệ
+                return response()->json(['message' => 'Token không hợp lệ'], 401);
             }
         }
 

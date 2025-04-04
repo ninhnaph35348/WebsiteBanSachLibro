@@ -120,6 +120,7 @@ Route::middleware(['auth:sanctum',  'role:s.admin|admin'])->group(function () {
         Route::get('/latest', [ProductController::class, 'latest']);
         Route::get('/', [ProductVariantController::class, 'index']);
         Route::get('/{id}', [ProductVariantController::class, 'show']);
+        Route::get('/product-variant/{productCode}/cover/{coverId}', [ProductVariantController::class, 'getByProductAndCover']);
         Route::post('/', [ProductVariantController::class, 'store']);
         Route::put('/edit/{id}', [ProductVariantController::class, 'update']);
         Route::put('/{id}', [ProductVariantController::class, 'destroy']);
@@ -170,6 +171,7 @@ Route::get('products/{id}', [ProductController::class, 'show']);
 Route::get('product_variants/{id}', [ProductVariantController::class, 'show']);
 Route::get('orders/{id}', [OrderController::class, 'show']);
 Route::get('reviews/{id}', [ReviewController::class, 'show']);
+
 // All
 Route::middleware('optional-auth')->post('carts/order/checkout', [CartController::class, 'checkout']);
 
@@ -177,3 +179,5 @@ Route::get('orders/status', [OrderStatusController::class, 'getAllOrderStatus'])
 Route::get('product_variants/latest', [ProductController::class, 'latest']);
 Route::get('products/search', [ProductController::class, 'search']);
 Route::get('products/filter', [ProductController::class, 'product_filtering']);
+Route::get('/product_variants/{code}/cover/{cover_id}', [ProductVariantController::class, 'getByProductAndCover']);
+Route::get('/products-bestsellers', [ProductController::class, 'bestSellers']);

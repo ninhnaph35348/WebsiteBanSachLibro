@@ -294,4 +294,45 @@ class ProductController extends Controller
 
         return response()->json($products);
     }
+
+    public function bestSellers()
+    {
+        // Lấy danh sách sản phẩm bán chạy nhất
+        $bestSellingVariants = DB::table('order_details')
+            ->select('order_details.product_variant_id', DB::raw('SUM(order_details.quantity) as total_sold'))
+            ->groupBy('order_details.product_variant_id')
+            ->orderByDesc('total_sold')
+            ->take(10)
+            ->get();
+
+        $variants = ProductVariant::with(['product', 'cover'])
+            ->whereIn('id', $bestSellingVariants->pluck('product_variant_id'))
+            ->get();
+
+        $result = $variants->map(function ($variant) use ($bestSellingVariants) {
+            $totalSold = $bestSellingVariants->firstWhere('product_variant_id', $variant->id)->total_sold ?? 0;
+
+            return [
+                'id' => $variant->id,
+                'quantity' => $variant->quantity,
+                'price' => $variant->price,
+                'promotion' => $variant->promotion,
+                'cover' => $variant->cover ? $variant->cover->type : null,
+                'total_sold' => $totalSold,
+                'product' => $variant->product ? [
+                    'code' => $variant->product->code,
+                    'title' => $variant->product->title,
+                    'author' => $variant->product->author ? $variant->product->author->name : null,
+                    'publisher' => $variant->product->publisher ? $variant->product->publisher->name : null,
+                    'language' => $variant->product->language ? $variant->product->language->name : null,
+                    'category' => $variant->product->category ? $variant->product->category->name : null,
+                    'genres' => $variant->product->genres ? $variant->product->genres->pluck('name') : null,
+                    'image' => $variant->product->image,
+                    'images' => $variant->product->images ? $variant->product->images->pluck('image_link') : null,
+                ] : null,
+            ];
+        });
+
+        return response()->json(['data' => $result]);
+    }
 }

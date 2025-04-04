@@ -31,6 +31,9 @@ class CartController extends Controller
                 'user_email' => 'nullable|email|max:255',
                 'user_phone' => 'nullable|string|max:20',
                 'user_address' => 'nullable|string|max:500',
+                'shipping_name' => 'nullable|string|max:255',
+                'shipping_phone' => 'nullable|string|max:20',
+                'shipping_address' => 'nullable|string|max:500',
             ]);
 
             DB::beginTransaction();
@@ -57,7 +60,7 @@ class CartController extends Controller
                 $orderDetails[] = [
                     'product_variant_id' => $variant->id,
                     'quantity' => $item['quantity'],
-                    'price' => $subtotal,
+                    'total_line' => $subtotal,
                 ];
 
                 // Trừ số lượng tồn kho
@@ -98,17 +101,20 @@ class CartController extends Controller
                 'order_status_id' => 1,
                 'payment_method' => $request->payment_method,
                 'voucher_id' => $voucherId,
-                'user_id' => $user ? $user->id : null, // Lưu user_id nếu đã đăng nhập
+                'user_id' => $user ? $user->id : null,
+                'shipping_name' => $request->shipping_name ?? ($user ? $user->username : null), // Lưu tên người nhận
+                'shipping_phone' => $request->shipping_phone ?? ($user ? $user->phone : null), // Lưu số điện thoại người nhận
+                'shipping_address' => $request->shipping_address ?? ($user ? $user->address : null), // Lưu địa chỉ người nhận
             ];
 
+            // Nếu đã đăng nhập, bạn có thể lấy thêm thông tin người dùng (người đặt)
             if ($user) {
-                // Nếu user đăng nhập, chỉ lưu nếu FE gửi thông tin
-                $orderData['user_name'] = $request->user_name ?? $user->username;
-                $orderData['user_email'] = $request->user_email ?? $user->email;
-                $orderData['user_phone'] = $request->user_phone ?? $user->phone;
-                $orderData['user_address'] = $request->user_address ?? $user->address;
+                $orderData['user_name'] = $user->username; // Lưu tên người đặt (người dùng)
+                $orderData['user_email'] = $user->email; // Lưu email người đặt
+                $orderData['user_phone'] = $user->phone; // Lưu số điện thoại người đặt
+                $orderData['user_address'] = $user->address; // Lưu địa chỉ người đặt
             } else {
-                // Nếu user không đăng nhập, lưu thông tin từ request
+                // Nếu chưa đăng nhập, lấy từ request
                 $orderData['user_name'] = $request->user_name;
                 $orderData['user_email'] = $request->user_email;
                 $orderData['user_phone'] = $request->user_phone;
@@ -128,7 +134,24 @@ class CartController extends Controller
             return response()->json([
                 'message' => 'Đặt hàng thành công!',
                 'total_price_cart' => $totalPrice,
-                'order' => new OrderResource($order),
+                'order' => [
+                    'id' => $order->id,
+                    'code_order' => $order->code_order,
+                    'total_price' => $order->total_price,
+                    'note' => $order->note,
+                    'user_name' => $order->user_name,
+                    'user_email' => $order->user_email,
+                    'user_phone' => $order->user_phone,
+                    'user_address' => $order->user_address,
+                    'payment_method' => $order->payment_method,
+                    'shipping_name' => $order->shipping_name,
+                    'shipping_phone' => $order->shipping_phone,
+                    'shipping_address' => $order->shipping_address,
+                    'status' => $order->status ? $order->status->name : null,
+                    'voucher' => $order->voucher->code ?? null,
+                    'user' => $order->user ? $order->user->username : null,
+                    'created_at' => $order->created_at->format('Y-m-d H:i:s')
+                ],
                 'order_details' => $orderDetails,
             ], 201);
         } catch (\Exception $e) {

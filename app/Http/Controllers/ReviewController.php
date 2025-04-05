@@ -45,8 +45,7 @@ class ReviewController extends Controller
                 'review' => $request->review,
                 'status' => 1,
                 'product_id' => $request->product_id,
-                // 'user_id' => Auth::id(), // Lấy user_id từ Auth
-                'user_id' => $request->user_id,
+                'user_id' => Auth::id(),
 
             ]);
 

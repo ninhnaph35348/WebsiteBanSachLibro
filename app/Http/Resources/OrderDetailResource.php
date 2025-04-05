@@ -11,24 +11,12 @@ class OrderDetailResource extends JsonResource
     {
         return [
             'id' => $this->id,
-            'order_id' => [
-                'code_order' => $this->order->code_order,
-                'order_status' => $this->order->status ? $this->order->status->name : null,
-                'total' => $this->order->total,
-                'created_at' => $this->order->created_at->format('Y-m-d H:i:s'),
-            ],
-            'product_variant' => [
-                'quantity' => $this->productVariant->quantity,
-                'price' => $this->productVariant->price,
-                'promotion' => $this->productVariant->promotion,
-                'product' => $this->productVariant->product ? [
-                    'code' => $this->productVariant->product->code,
-                    'title' => $this->productVariant->product->title,
-                    'image' => $this->productVariant->product->image,
-                ] : null,
-            ],
+            'code' => $this->productVariant->product->code,
+            'title' => $this->productVariant->product->title,
+            'price_product' => $this->productVariant->promotion ?? $this->productVariant->price,    
+            'image' => $this->productVariant->product->image,
             'quantity' => $this->quantity,
-            'total_line' => $this->total_line,
+            'total_line' => $this->quantity * $this->productVariant->promotion ?? $this->productVariant->price,
         ];
     }
 }

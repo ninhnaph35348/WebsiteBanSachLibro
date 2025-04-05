@@ -177,7 +177,7 @@ Route::get('reviews/{id}', [ReviewController::class, 'show']);
 // All
 Route::middleware('optional-auth')->post('carts/order/checkout', [CartController::class, 'checkout']);
 
-Route::get('orders/status', [OrderStatusController::class, 'getAllOrderStatus']);
+Route::get('status', [OrderStatusController::class, 'getAllOrderStatus']);
 Route::get('product_variants/latest', [ProductController::class, 'latest']);
 Route::get('products/search', [ProductController::class, 'search']);
 Route::get('products/filter', [ProductController::class, 'product_filtering']);

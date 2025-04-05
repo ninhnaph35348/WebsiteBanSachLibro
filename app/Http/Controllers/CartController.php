@@ -52,8 +52,8 @@ class CartController extends Controller
                 }
 
                 // Lấy giá khuyến mãi nếu có
-                $price = $variant->promotion ?? $variant->price;
-                $subtotal = $price * $item['quantity'];
+                $price_product = $variant->promotion ?? $variant->price;
+                $subtotal = $price_product * $item['quantity'];
                 $totalProductPrice += $subtotal;
 
                 // Chuẩn bị dữ liệu cho order_details

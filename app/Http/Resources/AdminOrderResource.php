@@ -5,7 +5,7 @@ namespace App\Http\Resources;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
 
-class OrderResource extends JsonResource
+class AdminOrderResource extends JsonResource
 {
     public function toArray(Request $request): array
     {
@@ -26,7 +26,7 @@ class OrderResource extends JsonResource
             'voucher' => $this->voucher ? $this->voucher->code : null,
             'user' => $this->user ? $this->user->username : null,
             'created_at' => $this->created_at->format('Y-m-d H:i:s'),
-            'order_details' => OrderDetailResource::collection($this->orderDetails),
+            'items' => AdminOrderDetailResource::collection($this->orderDetails),
         ];
     }
     private function getPaymentMethodName()

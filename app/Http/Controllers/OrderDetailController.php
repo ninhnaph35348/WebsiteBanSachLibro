@@ -25,9 +25,11 @@ class OrderDetailController extends Controller
 
     public function show(Request $request, $code_order)
     {
+        // Lấy user_id từ request
         $userId = $request->user()->id;
-        // Lấy chi tiết đơn hàng của user
-        $order = Order::with('orderDetails.productVariant.product') // eager load thông tin sản phẩm
+
+        // Tìm đơn hàng theo mã đơn hàng và user_id
+        $order = Order::with('orderDetails.productVariant')
             ->where('code_order', $code_order)
             ->where('user_id', $userId)
             ->first();
@@ -36,7 +38,6 @@ class OrderDetailController extends Controller
             return response()->json(['message' => 'Không tìm thấy đơn hàng'], 404);
         }
 
-        // Trả về chi tiết đơn hàng dưới dạng OrderDetailResource
-        return OrderDetailResource::collection($order->orderDetails);
+        return new OrderResource($order);
     }
 }

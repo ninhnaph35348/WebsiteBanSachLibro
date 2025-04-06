@@ -43,6 +43,8 @@ Route::post('/register', [AuthController::class, 'register']);
 Route::get('/login', [AuthController::class, 'login_'])->name('login');
 Route::post('/login', [AuthController::class, 'login']);
 Route::middleware(['auth:sanctum'])->group(function () {
+    Route::post('reviews/', [ReviewController::class, 'store']);
+    Route::delete('/products/{productCode}/reviews/{id}', [ReviewController::class, 'destroyReviewProduct']);
     Route::get('/profile', [AuthController::class, 'profile']);
     Route::put('/update-profile', [AuthController::class, 'updateProfile']);
     Route::put('/change-password', [AuthController::class, 'changePassword']);
@@ -142,7 +144,6 @@ Route::middleware(['auth:sanctum',  'role:s.admin|admin'])->group(function () {
     Route::prefix('reviews')->group(function () {
         Route::get('/', [ReviewController::class, 'index']);
         Route::get('/{id}', [ReviewController::class, 'show']);
-        Route::post('/', [ReviewController::class, 'store']);
         Route::put('/edit/{id}', [ReviewController::class, 'update']);
         Route::delete('/{id}', [ReviewController::class, 'destroy']);
         Route::put('/{id}', [ReviewController::class, 'hidden']);
@@ -160,7 +161,7 @@ Route::get('genres/', [GenreController::class, 'index']);
 Route::get('products/', [ProductController::class, 'index']);
 Route::get('product_variants/', [ProductVariantController::class, 'index']);
 Route::get('orders/', [OrderController::class, 'index']);
-Route::get('reviews/', [ReviewController::class, 'index']);
+Route::get('/review-products/{productCode}', [ReviewController::class, 'getReviewByProductId']);
 // Get Detail
 Route::get('users/{id}', [UserController::class, 'show']);
 Route::get('categories/{id}', [CategoryController::class, 'show']);
@@ -176,6 +177,7 @@ Route::get('reviews/{id}', [ReviewController::class, 'show']);
 
 // All
 Route::middleware('optional-auth')->post('carts/order/checkout', [CartController::class, 'checkout']);
+
 
 Route::get('status', [OrderStatusController::class, 'getAllOrderStatus']);
 Route::get('product_variants/latest', [ProductController::class, 'latest']);

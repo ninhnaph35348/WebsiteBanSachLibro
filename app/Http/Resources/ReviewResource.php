@@ -11,6 +11,7 @@ class ReviewResource extends JsonResource
     {
         return [
             'id' => $this->id,
+            'code' => $this->product ? $this->product->code : null,
             'rating' => $this->rating,
             'review' => $this->review,
             'status' => $this->status,

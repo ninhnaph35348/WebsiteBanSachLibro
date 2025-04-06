@@ -15,6 +15,7 @@ class VariantResoure extends JsonResource
             'quantity' => $this->quantity,
             'price' => $this->price,
             'promotion' => $this->promotion,
+            'cover_id' => $this->cover ? $this->cover->id : null, 
             'cover' => $this->cover ? $this->cover->type : null,
             'product' => $this->product ? [
                 'code' => $this->product->code,

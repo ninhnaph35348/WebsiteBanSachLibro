@@ -49,30 +49,44 @@ class OrderController extends Controller
             return response()->json(['message' => 'Không tìm thấy đơn hàng'], 404);
         }
 
-        // Nếu trạng thái đơn hàng đã là 6, 7, hoặc 8 thì không thể cập nhật nữa
-        if (in_array($order->order_status_id, [6, 7, 8])) {
+        $newStatus = $request['order_status_id'];
+        $currentStatus = $order->order_status_id;
+
+        // Không cho phép cập nhật nếu đơn hàng đã hoàn thành, hủy, hoặc từ chối
+        if (in_array($currentStatus, [6, 7, 8])) {
             return response()->json(['message' => 'Không thể thay đổi trạng thái đơn hàng này'], 400);
         }
 
-        if ($request['order_status_id'] <= $order->order_status_id) {
-            return response()->json(['message' => 'Không thể thay đổi trạng thái trước đó'], 400);
+        // Không được quay lùi trạng thái
+        if ($newStatus < $currentStatus) {
+            return response()->json(['message' => 'Không thể thay đổi về trạng thái trước đó'], 400);
         }
 
-        if ($order->order_status_id >= 3 && $request['order_status_id'] == 7) {
-            return response()->json(['message' => 'Không thể hủy nếu đơn hàng đã đang chuẩn bị hàng trở lên'], 400);
+        // Trường hợp hủy đơn
+        if ($newStatus == 7) {
+            if ($currentStatus < 3) {
+                // Cho phép hủy đơn
+            } else {
+                return response()->json(['message' => 'Không thể hủy nếu đơn hàng đã đang chuẩn bị hàng trở lên'], 400);
+            }
+        } else {
+            // Nếu không phải hủy đơn thì phải cập nhật tuần tự từng bước
+            if ($newStatus != $currentStatus + 1) {
+                return response()->json(['message' => 'Vui lòng cập nhật trạng thái theo thứ tự từng bước'], 400);
+            }
         }
 
-        // Cập nhật trạng thái đơn hàng
-        $order->update(['order_status_id' => $request['order_status_id']]);
+        // Tiến hành cập nhật trạng thái
+        $order->update(['order_status_id' => $newStatus]);
 
         // Lấy tên trạng thái đơn hàng
-        $orderStatus = DB::table('order_statuses')->where('id', $request['order_status_id'])->value('name');
+        $orderStatus = DB::table('order_statuses')->where('id', $newStatus)->value('name');
 
         return response()->json([
             'message' => 'Cập nhật trạng thái đơn hàng thành công',
             'data' => [
                 'code_order' => $order->code_order,
-                'order_status_name' => $orderStatus, // Hiển thị tên trạng thái
+                'order_status_name' => $orderStatus,
             ]
         ]);
     }

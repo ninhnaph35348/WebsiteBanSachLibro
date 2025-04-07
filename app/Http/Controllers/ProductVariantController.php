@@ -16,9 +16,7 @@ class ProductVariantController extends Controller
     {
         $products = ProductVariant::with(['product', 'cover'])
             ->where('del_flg', 0)
-            ->orderBy('id', 'desc')
             ->get();
-
         return VariantResoure::collection($products);
     }
 
@@ -34,18 +32,6 @@ class ProductVariantController extends Controller
             'price' => 'required|min:0',
             'promotion' => 'nullable|min:0',
         ]);
-
-        // Kiểm tra xem đã có bìa này cho sách này chưa
-        $exists = ProductVariant::where('product_id', $request->product_id)
-            ->where('cover_id', $request->cover_id)
-            ->where('del_flg', 0) // chỉ tính những bản ghi chưa xóa mềm (nếu dùng soft delete)
-            ->exists();
-
-        if ($exists) {
-            return response()->json([
-                'message' => 'Sách này đã có phiên bản với loại bìa này rồi.',
-            ], 422);
-        }
 
         $variant = ProductVariant::create($request->all());
 

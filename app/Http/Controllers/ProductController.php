@@ -317,6 +317,7 @@ class ProductController extends Controller
                 'quantity' => $variant->quantity,
                 'price' => $variant->price,
                 'promotion' => $variant->promotion,
+                'cover_id' => $variant->cover_id,
                 'cover' => $variant->cover ? $variant->cover->type : null,
                 'total_sold' => $totalSold,
                 'product' => $variant->product ? [

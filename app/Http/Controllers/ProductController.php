@@ -21,6 +21,7 @@ class ProductController extends Controller
     {
         $products = Product::with('author', 'publisher', 'language', 'category', 'genres', 'images')
             ->where('del_flg', 0)
+            ->orderBy('id', 'desc')
             ->get();
 
         return ProductResource::collection($products);

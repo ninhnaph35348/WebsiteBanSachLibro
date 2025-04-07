@@ -13,7 +13,7 @@ class ReviewController extends Controller
     // Lấy danh sách tất cả reviews
     public function index()
     {
-        $reviews = Review::where('del_flg', 0)->get();
+        $reviews = Review::where('del_flg', 0)->orderBy('id', 'desc')->get();
         return response()->json(ReviewResource::collection($reviews), 200);
     }
 

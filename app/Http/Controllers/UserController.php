@@ -21,7 +21,7 @@ class UserController extends Controller
             $query->where('role', $userType);
         }
 
-        $users = $query->get();
+        $users = $query->orderBy('id', 'desc')->get();
 
         return response()->json($users, 200);
     }

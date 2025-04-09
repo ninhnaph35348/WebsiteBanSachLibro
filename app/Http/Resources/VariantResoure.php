@@ -4,6 +4,7 @@ namespace App\Http\Resources;
 
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
+use Illuminate\Support\Facades\DB;
 
 class VariantResoure extends JsonResource
 {
@@ -17,7 +18,7 @@ class VariantResoure extends JsonResource
             'promotion' => $this->promotion,
             'cover_id' => $this->cover ? $this->cover->id : null,
             'cover' => $this->cover ? $this->cover->type : null,
-            
+            'sold_quantity' => $this->soldQuantity($this->product->code),
             'product' => $this->product ? [
                 'code' => $this->product->code,
                 'title' => $this->product->title,
@@ -32,5 +33,16 @@ class VariantResoure extends JsonResource
                 'images' => $this->product->images ? $this->product->images->pluck('image_link') : null,
             ] : null,
         ];
+    }
+
+    public function soldQuantity(string $code)
+    {
+        return DB::table('order_details')
+            ->join('product_variants', 'order_details.product_variant_id', '=', 'product_variants.id')
+            ->join('products', 'product_variants.product_id', '=', 'products.id')
+            ->join('orders', 'order_details.order_id', '=', 'orders.id')
+            ->where('products.code', $code)
+            ->where('orders.order_status_id', 6) // 6 là trạng thái "đã hoàn tất"
+            ->sum('order_details.quantity');
     }
 }

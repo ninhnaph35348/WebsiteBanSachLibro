@@ -44,7 +44,7 @@ class OrderController extends Controller
 
     public function update(Request $request, $code_order)
     {
-        $order = Order::where('code_order', $code_order)->first();
+        $order = Order::with('orderDetails')->where('code_order', $code_order)->first();
         if (!$order) {
             return response()->json(['message' => 'Không tìm thấy đơn hàng'], 404);
         }
@@ -76,18 +76,50 @@ class OrderController extends Controller
             }
         }
 
-        // Tiến hành cập nhật trạng thái
-        $order->update(['order_status_id' => $newStatus]);
+        DB::beginTransaction();
+        try {
+            // Nếu chuyển sang trạng thái 6 (Đã giao hàng), trừ kho
+            if ($newStatus == 6) {
+                foreach ($order->orderDetails as $detail) {
+                    $variant = ProductVariant::find($detail->product_variant_id);
 
-        // Lấy tên trạng thái đơn hàng
-        $orderStatus = DB::table('order_statuses')->where('id', $newStatus)->value('name');
+                    if (!$variant) {
+                        DB::rollBack();
+                        return response()->json(['message' => 'Không tìm thấy biến thể sản phẩm'], 404);
+                    }
 
-        return response()->json([
-            'message' => 'Cập nhật trạng thái đơn hàng thành công',
-            'data' => [
-                'code_order' => $order->code_order,
-                'order_status_name' => $orderStatus,
-            ]
-        ]);
+                    if ($variant->quantity < $detail->quantity) {
+                        DB::rollBack();
+                        return response()->json([
+                            'message' => "Sản phẩm {$variant->product->title} không đủ hàng trong kho."
+                        ], 400);
+                    }
+
+                    $variant->decrement('quantity', $detail->quantity);
+                }
+            }
+
+            // Cập nhật trạng thái đơn hàng
+            $order->update(['order_status_id' => $newStatus]);
+
+            DB::commit();
+
+            // Lấy tên trạng thái đơn hàng
+            $orderStatus = DB::table('order_statuses')->where('id', $newStatus)->value('name');
+
+            return response()->json([
+                'message' => 'Cập nhật trạng thái đơn hàng thành công',
+                'data' => [
+                    'code_order' => $order->code_order,
+                    'order_status_name' => $orderStatus,
+                ]
+            ]);
+        } catch (\Exception $e) {
+            DB::rollBack();
+            return response()->json([
+                'message' => 'Đã xảy ra lỗi khi cập nhật trạng thái đơn hàng',
+                'error' => $e->getMessage()
+            ], 500);
+        }
     }
 }

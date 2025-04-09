@@ -62,9 +62,6 @@ class CartController extends Controller
                     'quantity' => $item['quantity'],
                     'total_line' => $subtotal,
                 ];
-
-                // Trừ số lượng tồn kho
-                $variant->decrement('quantity', $item['quantity']);
             }
 
             // Phí vận chuyển (nếu không có thì mặc định = 0)

@@ -160,8 +160,8 @@ Route::get('authors/', [AuthorController::class, 'index']);
 Route::get('languages/', [LanguageController::class, 'index']);
 Route::get('publishers/', [PublisherController::class, 'index']);
 Route::get('genres/', [GenreController::class, 'index']);
-Route::get('products/', [ProductController::class, 'index']);
-Route::get('product_variants/', [ProductVariantController::class, 'index']);
+Route::get('products_status/', [ProductController::class, 'getAllProductByStatus']);
+Route::get('product_variants_status/', [ProductVariantController::class, 'getAllProductVariantByStatus']);
 Route::get('orders/', [OrderController::class, 'index']);
 Route::get('/review-products/{productCode}', [ReviewController::class, 'getReviewByProductId']);
 // Get Detail

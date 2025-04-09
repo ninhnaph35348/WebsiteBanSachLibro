@@ -16,10 +16,22 @@ class ProductVariantController extends Controller
     {
         $products = ProductVariant::with(['product', 'cover'])
             ->where('del_flg', 0)
+            ->orderBy('id', 'desc')
             ->get();
         return VariantResoure::collection($products);
     }
+    public function getAllProductVariantByStatus()
+    {
+        $products = ProductVariant::with(['product', 'cover'])
+            ->where('del_flg', 0)
+            ->whereHas('product', function ($query) {
+                $query->where('status', 'in_stock');
+            })
+            ->orderBy('id', 'desc')
+            ->get();
 
+        return VariantResoure::collection($products);
+    }
     /**
      * Store a newly created resource in storage.
      */

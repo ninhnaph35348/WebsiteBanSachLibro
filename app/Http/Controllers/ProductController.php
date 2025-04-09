@@ -21,23 +21,23 @@ class ProductController extends Controller
     {
         $products = Product::with('author', 'publisher', 'language', 'category', 'genres', 'images')
             ->where('del_flg', 0)
-            ->whereHas('product', function ($query) {
-                $query->where('status', 'in_stock');
-            })
             ->orderBy('created_at', 'desc')
             ->get();
 
         return ProductResource::collection($products);
     }
+
     public function getAllProductByStatus()
     {
         $products = Product::with('author', 'publisher', 'language', 'category', 'genres', 'images')
             ->where('del_flg', 0)
+            ->where('status', 'in_stock')
             ->orderBy('id', 'desc')
             ->get();
 
         return ProductResource::collection($products);
     }
+
     public function product_filtering(Request $request)
     {
         $query = Product::with('author', 'publisher', 'language', 'category', 'genres', 'images', 'variants.cover')

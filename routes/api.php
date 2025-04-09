@@ -20,6 +20,7 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\OrderController;
 use App\Http\Controllers\OrderDetailController;
 use App\Http\Controllers\OrderStatusController;
+use App\Http\Controllers\VnPayController;
 use App\Models\User;
 
 /*
@@ -118,6 +119,7 @@ Route::middleware(['auth:sanctum',  'role:s.admin|admin'])->group(function () {
         Route::get('/{id}', [ProductController::class, 'show']);
         Route::post('/', [ProductController::class, 'store']);
         Route::put('/edit/{id}', [ProductController::class, 'update']);
+        Route::put('/update-status/{id}', [ProductController::class, 'updateProductStatus']);
         Route::put('/{id}', [ProductController::class, 'destroy']);
     });
     Route::prefix('product_variants')->group(function () {
@@ -200,3 +202,7 @@ Route::prefix('statistics')->group(function () {
 Route::get('/product_variants/{code}/cover/{cover_id}', [ProductVariantController::class, 'getByProductAndCover']);
 Route::get('/products-bestsellers', [ProductController::class, 'bestSellers']);
 // Route::get('/order_detail/{code_order}', [OrderDetailController::class, 'show']);
+
+// VnPay
+// Route::post('/vnpay-create', [VnPayController::class, 'createPayment']);
+// Route::get('/vnpay-return', [VnPayController::class, 'vnpayReturn']);

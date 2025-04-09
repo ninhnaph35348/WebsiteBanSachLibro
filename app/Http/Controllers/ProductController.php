@@ -76,6 +76,8 @@ class ProductController extends Controller
                 'title' => 'required|string|max:255',
                 'image' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
                 'supplier_name' => 'required|string|max:150',
+                'published_year' => 'required|integer',
+                'book_count' => 'required|integer',
                 'author_id' => 'required|exists:authors,id',
                 'publisher_id' => 'required|exists:publishers,id',
                 'description' => 'required|string',
@@ -94,6 +96,7 @@ class ProductController extends Controller
 
 
             // Tạo sản phẩm
+            $validatedData['status'] = 'in_stock';
             $product = Product::create($validatedData);
 
             // Gán genres nếu có
@@ -158,6 +161,8 @@ class ProductController extends Controller
                 'title' => 'sometimes|string|max:255',
                 'image' => 'nullable',
                 'supplier_name' => 'sometimes|string|max:150',
+                'published_year' => 'sometimes|integer',
+                'book_count' => 'sometimes|integer',
                 'author_id' => 'sometimes|exists:authors,id',
                 'publisher_id' => 'sometimes|exists:publishers,id',
                 'description' => 'sometimes',
@@ -232,19 +237,19 @@ class ProductController extends Controller
         }
 
         try {
-            // Xóa ảnh đại diện nếu có
-            if ($product->image) {
-                Storage::disk('public')->delete($product->image);
-            }
+            // // Xóa ảnh đại diện nếu có
+            // if ($product->image) {
+            //     Storage::disk('public')->delete($product->image);
+            // }
 
-            // Xóa ảnh trong bảng multiple_images
-            foreach ($product->images as $image) {
-                Storage::disk('public')->delete($image->image_link); // Xóa file trong storage
-                $image->delete(); // Xóa record trong DB
-            }
+            // // Xóa ảnh trong bảng multiple_images
+            // foreach ($product->images as $image) {
+            //     Storage::disk('public')->delete($image->image_link); // Xóa file trong storage
+            //     $image->delete(); // Xóa record trong DB
+            // }
 
-            // Xóa quan hệ với genres (tránh rác trong bảng pivot)
-            $product->genres()->detach();
+            // // Xóa quan hệ với genres (tránh rác trong bảng pivot)
+            // $product->genres()->detach();
 
 
             $product->update(['del_flg' => 1]);
@@ -257,14 +262,35 @@ class ProductController extends Controller
             ], 500);
         }
     }
+    public function updateProductStatus(Request $request, $code)
+    {
+        $product = Product::where('code', $code)->first();
 
+        if (!$product) {
+            return response()->json(['message' => "Không tìm thấy sản phẩm"], 404);
+        }
+
+        // Validate status truyền vào
+        $validated = $request->validate([
+            'status' => 'required|in:in_stock,out_stock',
+        ]);
+
+        $product->update(['status' => $validated['status']]);
+
+        return response()->json([
+            'message' => $validated['status'] === 'out_stock' ? 'Sản phẩm đã bị ẩn' : 'Sản phẩm đã được hiển thị',
+        ], 200);
+    }
     public function latest()
     {
         $products = ProductVariant::with(['product', 'cover'])
             ->where('del_flg', 0)
-            ->orderBy('created_at', 'desc') // Sắp xếp theo ngày tạo mới nhất
+            ->whereHas('product', function ($query) {
+                $query->where('status', 'in_stock');
+            })
+            ->orderBy('created_at', 'desc')
             ->take(10)
-            ->get(); // Loại bỏ đối số không hợp lệ trong get()
+            ->get();
 
         return VariantResoure::collection($products);
     }

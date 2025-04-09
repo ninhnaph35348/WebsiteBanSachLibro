@@ -16,6 +16,8 @@ class Product extends Model
         'title',
         'image',
         'supplier_name',
+        'published_year',
+        'book_count',
         'author_id',
         'publisher_id',
         'description',

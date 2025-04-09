@@ -17,7 +17,7 @@ class ReviewResource extends JsonResource
             'status' => $this->status,
             'title' => $this->product ? $this->product->title : null,
             'username' => $this->user ? $this->user->username : null,
-            'created_at' => $this->created_at->format('Y-m-d H:i:s'),
+            'created_at' => $this->created_at->format('H:i d/m/Y'),
         ];
     }
 }

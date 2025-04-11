@@ -309,26 +309,27 @@ class ProductController extends Controller
     {
         $keyword = $request->input('s');
 
-        $query = Product::query();
+        $query = ProductVariant::query()
+            ->join('products', 'product_variants.product_id', '=', 'products.id')
+            ->select('product_variants.*', 'products.title', 'products.supplier_name', 'products.description', 'products.category_id', 'products.status');
 
         if ($keyword) {
             $query->where(function ($q) use ($keyword) {
-                $q->where('title', 'like', '%' . $keyword . '%')
-                    ->orWhere('code', 'like', '%' . $keyword . '%')
-                    ->orWhere('supplier_name', 'like', '%' . $keyword . '%')
-                    ->orWhere('description', 'like', '%' . $keyword . '%');
+                $q->where('products.title', 'like', '%' . $keyword . '%')
+                    ->orWhere('products.supplier_name', 'like', '%' . $keyword . '%')
+                    ->orWhere('products.description', 'like', '%' . $keyword . '%');
             });
         }
 
         if ($request->has('category_id')) {
-            $query->where('category_id', $request->input('category_id'));
+            $query->where('products.category_id', $request->input('category_id'));
         }
 
         if ($request->has('status')) {
-            $query->where('status', $request->input('status'));
+            $query->where('products.status', $request->input('status'));
         }
 
-        $products = $query->paginate(10);
+        $products = $query->get();
 
         return response()->json($products);
     }

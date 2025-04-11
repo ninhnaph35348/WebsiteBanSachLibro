@@ -18,6 +18,7 @@ class ProductResource extends JsonResource
             'published_year' => $this->published_year,
             'book_count' => $this->book_count,
             'description' => $this->description,
+            'rating' => round($this->reviews->avg('rating'), 1),
             'status' => $this->status,
             'del_flg' => $this->del_flg,
             'author' => $this->author ? $this->author->name : null,

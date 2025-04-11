@@ -204,5 +204,5 @@ Route::get('/products-bestsellers', [ProductController::class, 'bestSellers']);
 // Route::get('/order_detail/{code_order}', [OrderDetailController::class, 'show']);
 
 // VnPay
-// Route::post('/vnpay-create', [VnPayController::class, 'createPayment']);
-// Route::get('/vnpay-return', [VnPayController::class, 'vnpayReturn']);
+Route::post('/vnpay-create', [VnPayController::class, 'createPayment']);
+Route::get('/vnpay-return', [VnPayController::class, 'vnpayReturn']);

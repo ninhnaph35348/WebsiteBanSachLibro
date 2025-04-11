@@ -164,6 +164,7 @@ Route::get('products_status/', [ProductController::class, 'getAllProductByStatus
 Route::get('product_variants_status/', [ProductVariantController::class, 'getAllProductVariantByStatus']);
 Route::get('orders/', [OrderController::class, 'index']);
 Route::get('/review-products/{productCode}', [ReviewController::class, 'getReviewByProductId']);
+Route::get('product_variants_toprate/', [ProductVariantController::class, 'getTop5ProductVarriantByRating']);
 // Get Detail
 Route::get('users/{id}', [UserController::class, 'show']);
 Route::get('categories/{id}', [CategoryController::class, 'show']);

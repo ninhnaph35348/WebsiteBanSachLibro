@@ -10,7 +10,7 @@ class VnpayController extends Controller
     private $vnp_TmnCode = "JJINZW3F";
     private $vnp_HashSecret = "WUB93OSEY5GUUVEHYTPSWEIM0TWNMJRM";
     private $vnp_Url = "https://sandbox.vnpayment.vn/paymentv2/vpcpay.html";
-    private $vnp_ReturnUrl = "http://localhost:5173/check-out"; // frontend URL
+    private $vnp_ReturnUrl = "http://localhost:5173/profile/order_detail"; // frontend URL
 
     public function createPayment(Request $request)
     {
@@ -55,7 +55,7 @@ class VnpayController extends Controller
 
         $vnp_Url = $this->vnp_Url . "?" . $query;
         if (isset($this->vnp_HashSecret)) {
-            $vnpSecureHash =   hash_hmac('sha512', $hashdata, $this->vnp_HashSecret);//
+            $vnpSecureHash =   hash_hmac('sha512', $hashdata, $this->vnp_HashSecret); //
             $vnp_Url .= 'vnp_SecureHash=' . $vnpSecureHash;
         }
 

@@ -32,6 +32,26 @@ class ProductVariantController extends Controller
 
         return VariantResoure::collection($products);
     }
+
+    public function getTop5ProductVarriantByRating()
+    {
+        $products = ProductVariant::with([
+            'product',
+            'cover',
+        ])
+            ->where('del_flg', 0)
+            ->whereHas('product', function ($query) {
+                $query->where('status', 'in_stock');
+            })
+            ->get()
+            ->sortByDesc(function ($variant) {
+                return $variant->product->reviews->avg('rating') ?? 0;
+            })
+            ->take(5)
+            ->values(); // reset index
+
+        return VariantResoure::collection($products);
+    }
     /**
      * Store a newly created resource in storage.
      */

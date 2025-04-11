@@ -367,6 +367,7 @@ class ProductController extends Controller
                 'product' => $variant->product ? [
                     'code' => $variant->product->code,
                     'title' => $variant->product->title,
+                    'rating' => round($variant->product->reviews->avg('rating'), 1),
                     'author' => $variant->product->author ? $variant->product->author->name : null,
                     'publisher' => $variant->product->publisher ? $variant->product->publisher->name : null,
                     'language' => $variant->product->language ? $variant->product->language->name : null,

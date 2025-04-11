@@ -25,6 +25,7 @@ class VariantResoure extends JsonResource
                 'author' => $this->product->author ? $this->product->author->name : null,
                 'publisher' => $this->product->publisher ? $this->product->publisher->name : null,
                 'description' => $this->product->description ? $this->product->description : null,
+                'rating' => round($this->product->reviews->avg('rating'), 1),
                 'published_year' => $this->product->published_year ? $this->product->published_year : null,
                 'book_count' => $this->product->book_count ? $this->product->book_count : null,
                 'supplier_name' => $this->product->supplier_name ? $this->product->supplier_name : null,

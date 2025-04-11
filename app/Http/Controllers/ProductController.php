@@ -19,7 +19,7 @@ class ProductController extends Controller
      */
     public function index()
     {
-        $products = Product::with('author', 'publisher', 'language', 'category', 'genres', 'images')
+        $products = Product::with('reviews', 'author', 'publisher', 'language', 'category', 'genres', 'images')
             ->where('del_flg', 0)
             ->orderBy('created_at', 'desc')
             ->get();

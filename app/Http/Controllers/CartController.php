@@ -71,25 +71,60 @@ class CartController extends Controller
             $discount = 0;
             $voucherId = null;
 
+            // Kiểm tra người dùng có đăng nhập không
+            $user = auth('api')->user();
+
+            if ($request->voucher_code && !$user) {
+                return response()->json(['message' => 'Bạn cần đăng nhập để sử dụng mã giảm giá!'], 401);
+            }
+
             if ($request->voucher_code) {
                 $voucher = Voucher::where('code', $request->voucher_code)
-                    ->where('valid_from', '<=', now()) // Voucher có hiệu lực
-                    ->where('valid_to', '>=', now()) // Chưa hết hạn
+                    ->where('valid_from', '<=', now())
+                    ->where('valid_to', '>=', now())
                     ->first();
 
-                if ($voucher) {
-                    $discount = $voucher->discount;
-                    $voucherId = $voucher->id; // Lưu voucher_id để lưu vào đơn hàng
-                } else {
+                if (!$voucher) {
                     return response()->json(['message' => 'Mã giảm giá không hợp lệ hoặc đã hết hạn!'], 400);
+                }
+
+                $voucherId = $voucher->id;
+
+                if ($user) {
+                    // Kiểm tra user đã dùng voucher này chưa
+                    $hasUsed = DB::table('voucher_user')
+                        ->where('user_id', $user->id)
+                        ->where('voucher_id', $voucherId)
+                        ->where('status', 'success') // đã dùng thành công
+                        ->exists();
+
+                    if ($hasUsed) {
+                        return response()->json(['message' => 'Bạn đã sử dụng mã giảm giá này rồi!'], 400);
+                    }
+                }
+
+                // Tính giảm giá
+                if ($voucher->discount_type === 'percent') {
+                    $discount = $totalProductPrice * ($voucher->discount / 100);
+                    if ($voucher->max_discount) {
+                        $discount = min($discount, $voucher->max_discount);
+                    }
+                } elseif ($voucher->discount_type === 'fixed') {
+                    $discount = $voucher->discount;
+                } else {
+                    return response()->json(['message' => 'Loại giảm giá không hợp lệ!'], 400);
+                }
+
+                // Kiểm tra đơn hàng có đạt min_order_value không
+                if ($voucher->min_order_value && $totalProductPrice < $voucher->min_order_value) {
+                    return response()->json(['message' => 'Đơn hàng chưa đủ điều kiện áp dụng voucher.'], 400);
                 }
             }
 
             // Tính tổng tiền sau khi áp dụng giảm giá
             $totalPrice = max(0, $totalProductPrice + $shippingFee - $discount);
 
-            // Kiểm tra người dùng có đăng nhập không
-            $user = auth('api')->user();
+
             // Nếu đã đăng nhập, lấy thông tin user từ hệ thống, nếu không thì lấy từ request
             $orderData = [
                 'code_order' => $codeOrder,
@@ -121,6 +156,21 @@ class CartController extends Controller
             // Tạo đơn hàng
             $order = Order::create($orderData);
 
+            if ($voucherId && $user) {
+
+                // Cập nhật số lượng voucher đã sử dụng
+                $voucher->decrement('quantity');
+                $voucher->increment('used');
+
+                DB::table('voucher_user')->insert([
+                    'user_id' => $user->id,
+                    'voucher_id' => $voucherId,
+                    'used_at' => now(),
+                    'status' => 'success',
+                    'created_at' => now(),
+                    'updated_at' => now(),
+                ]);
+            }
             foreach ($orderDetails as &$detail) {
                 $detail['order_id'] = $order->id;
             }
@@ -157,6 +207,100 @@ class CartController extends Controller
                 'message' => 'Lỗi khi đặt hàng!',
                 'error' => $e->getMessage()
             ], 500);
+        }
+    }
+
+    public function cancelOrder($order_code)
+    {
+        // Lấy thông tin đơn hàng từ database
+        $order = Order::where('code_order', $order_code)->first();
+
+        if (!$order) {
+            return response()->json(['message' => 'Đơn hàng không tồn tại!'], 404);
+        }
+
+        // Kiểm tra quyền của người dùng
+        if (auth('api')->user()->role !== 'sadmin' && auth('api')->user()->role !== 'admin') {
+            // Nếu không phải admin hoặc super admin thì chỉ có thể hủy đơn của chính mình
+            if (auth('api')->id() !== $order->user_id) {
+                return response()->json(['message' => 'Bạn không có quyền hủy đơn hàng này!'], 403);
+            }
+        }
+
+        // Kiểm tra trạng thái đơn hàng (chỉ hủy được đơn hàng có trạng thái < 3)
+        if ($order->order_status_id >= 3) {
+            return response()->json(['message' => 'Đơn hàng không thể hủy khi đã ở trạng thái xử lý hoặc đã giao!'], 400);
+        }
+
+        // Kiểm tra nếu khách hàng chỉ được hủy khi đơn hàng có status = 1
+        if ($order->order_status_id == 1) {
+            // Logic hủy đơn hàng
+            $order->order_status_id = 7; // 7: trạng thái hủy đơn hàng
+            $order->save();
+
+            // Hoàn lại số lượng sản phẩm cho mỗi chi tiết đơn hàng
+            $orderDetails = $order->orderDetails; // Lấy thông tin chi tiết đơn hàng liên kết với order
+            if ($orderDetails->isEmpty()) {
+                return response()->json(['message' => 'Không có chi tiết đơn hàng để hủy!'], 400);
+            }
+
+            foreach ($orderDetails as $detail) {
+                $productVariant = $detail->productVariant;
+                if ($productVariant) {
+                    $productVariant->quantity += $detail->quantity; // Cộng lại số lượng sản phẩm
+                    $productVariant->save();
+                }
+            }
+
+            // Hoàn lại voucher nếu có
+            if ($order->voucher_id) {
+                DB::table('voucher_user')
+                    ->where('voucher_id', $order->voucher_id)
+                    ->where('user_id', $order->user_id)
+                    ->update(['status' => 'failed']); // Đánh dấu voucher đã được hoàn lại
+            }
+
+            return response()->json(['message' => 'Đơn hàng đã được hủy thành công!'], 200);
+        } elseif ($order->order_status_id == 2) {
+            // Nếu trạng thái đơn hàng là 2 (Đang xử lý), yêu cầu admin phê duyệt
+            return response()->json(['message' => 'Đơn hàng đang xử lý, yêu cầu admin phê duyệt hủy đơn!'], 400);
+        } else {
+            // Nếu không phải trạng thái 1 hoặc 2
+            return response()->json(['message' => 'Không thể hủy đơn hàng ở trạng thái này!'], 400);
+        }
+    }
+
+
+    private function processCancel($order, $isAdmin = false)
+    {
+        DB::beginTransaction();
+        try {
+            // Hoàn số lượng hàng
+            foreach ($order->details as $detail) {
+                $variant = ProductVariant::find($detail->product_variant_id);
+                if ($variant) {
+                    $variant->quantity += $detail->quantity;
+                    $variant->save();
+                }
+            }
+
+            // Cộng lại voucher nếu có
+            if ($order->voucher_id && $order->user_id) {
+                DB::table('voucher_user')
+                    ->where('voucher_id', $order->voucher_id)
+                    ->where('user_id', $order->user_id)
+                    ->update(['status' => 'canceled']);
+            }
+
+            // Cập nhật trạng thái đơn hàng
+            $order->order_status_id = $isAdmin ? 99 : 4; // 99: admin hủy, 4: hủy thường
+            $order->save();
+
+            DB::commit();
+            return response()->json(['message' => 'Đơn hàng đã được hủy thành công!']);
+        } catch (\Exception $e) {
+            DB::rollBack();
+            return response()->json(['message' => 'Hủy đơn thất bại!', 'error' => $e->getMessage()], 500);
         }
     }
 }

@@ -10,7 +10,7 @@ class VnpayController extends Controller
     private $vnp_TmnCode = "JJINZW3F";
     private $vnp_HashSecret = "WUB93OSEY5GUUVEHYTPSWEIM0TWNMJRM";
     private $vnp_Url = "https://sandbox.vnpayment.vn/paymentv2/vpcpay.html";
-    private $vnp_ReturnUrl = "http://localhost:5173/profile/order_detail"; // frontend URL
+    private $vnp_ReturnUrl = "http://localhost:5173/vnpay-return";
 
     public function createPayment(Request $request)
     {

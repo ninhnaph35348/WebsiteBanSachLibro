@@ -26,6 +26,13 @@ class VoucherController extends Controller
             $request->validate([
                 'code' => 'required|string|unique:vouchers,code|max:50',
                 'discount' => 'required|numeric',
+                'discount_type' => 'required|string|in:percent,fixed',
+                'max_discount' => 'nullable|numeric',
+                'min_order_value' => 'required|numeric',
+                'quantity' => 'required|integer|min:1',
+                'used' => 'integer|min:0',
+                'max_usage_per_user' => 'required|integer|min:1',
+                'status' => 'required|boolean',
                 'valid_from' => 'required|date',
                 'valid_to' => 'required|date|after_or_equal:valid_from',
             ]);
@@ -44,9 +51,10 @@ class VoucherController extends Controller
     /**
      * Display the specified resource.
      */
-    public function show(string $id)
+    public function show(string $code)
     {
-        $voucher = Voucher::find($id);
+        $voucher = Voucher::where('code', $code)->first();
+
         if (!$voucher) {
             return response()->json(['message' => 'Voucher không tồn tại'], 404);
         }
@@ -56,17 +64,25 @@ class VoucherController extends Controller
     /**
      * Update the specified resource in storage.
      */
-    public function update(Request $request, string $id)
+    public function update(Request $request, string $code)
     {
         try {
-            $voucher = Voucher::find($id);
+            $voucher = Voucher::where('code', $code)->first();
+
             if (!$voucher) {
                 return response()->json(['message' => 'Voucher không tồn tại'], 404);
             }
 
             $request->validate([
-                'code' => 'string|unique:vouchers,code|max:50',
+                'code' => 'string|unique:vouchers,code,' . $voucher->id . '|max:50', // Chỉ kiểm tra duy nhất nếu mã voucher đã thay đổi
                 'discount' => 'numeric',
+                'discount_type' => 'string|in:percent,fixed',
+                'max_discount' => 'nullable|numeric',
+                'min_order_value' => 'numeric',
+                'quantity' => 'integer|min:1',
+                'used' => 'integer|min:0',
+                'max_usage_per_user' => 'integer|min:1',
+                'status' => 'boolean',
                 'valid_from' => 'date',
                 'valid_to' => 'date|after_or_equal:valid_from',
             ]);
@@ -82,17 +98,18 @@ class VoucherController extends Controller
         }
     }
 
+
     /**
      * Remove the specified resource from storage.
      */
-    public function destroy(string $id)
+    public function destroy(string $code)
     {
-        $voucher = Voucher::find($id);
+        $voucher = Voucher::where('code', $code)->first();
+
         if (!$voucher) {
             return response()->json(['message' => 'Voucher không tồn tại'], 404);
         }
 
-        // $voucher->delete();
         $voucher->update(['del_flg' => 1]);
 
         return response()->json(['message' => 'Voucher đã được xóa thành công']);

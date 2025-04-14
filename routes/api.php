@@ -180,7 +180,7 @@ Route::get('reviews/{id}', [ReviewController::class, 'show']);
 
 // All
 Route::middleware('optional-auth')->post('carts/order/checkout', [CartController::class, 'checkout']);
-
+Route::middleware('auth:api')->post('/orders/cancel/{order_code}', [CartController::class, 'cancelOrder']);
 
 Route::get('status', [OrderStatusController::class, 'getAllOrderStatus']);
 Route::get('product_variants/latest', [ProductController::class, 'latest']);

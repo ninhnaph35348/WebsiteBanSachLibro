@@ -24,6 +24,8 @@ class User extends Authenticatable
         'status',
         'role',
         'del_flg',
+        'created_at',
+        'updated_at',
     ];
     /**
      * The attributes that should be hidden for serialization.
@@ -62,5 +64,12 @@ class User extends Authenticatable
     public function reviews()
     {
         return $this->hasMany(Review::class, 'user_id');
+    }
+
+    public function vouchers()
+    {
+        return $this->belongsToMany(Voucher::class, 'voucher_user', 'user_id', 'voucher_id')
+            ->withPivot('used_at', 'status') // truy xuất thêm các trường trong bảng trung gian
+            ->withTimestamps(); // Lưu lại thời gian created_at và updated_at
     }
 }

@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 
@@ -13,7 +14,7 @@ class StatisticsController extends Controller
         $totalBooks = DB::table('products')
             ->where('del_flg', 0)
             ->count();
-        
+
         return response()->json([
             'Tổng số lượng sách' => $totalBooks
         ]);
@@ -26,7 +27,7 @@ class StatisticsController extends Controller
             ->join('products', 'product_variants.product_id', '=', 'products.id')
             ->where('products.del_flg', 0)
             ->sum('order_details.quantity');
-        
+
         return response()->json([
             'Số lượng sách đã bán' => $soldBooks
         ]);
@@ -39,7 +40,7 @@ class StatisticsController extends Controller
             ->where('products.del_flg', 0)
             ->where('product_variants.del_flg', 0)
             ->sum('product_variants.quantity');
-        
+
         return response()->json([
             'Số lượng sách còn trong kho' => $inStock
         ]);
@@ -50,7 +51,7 @@ class StatisticsController extends Controller
         $totalRevenue = DB::table('orders')
             ->whereNotIn('order_status_id', [7, 8]) // Loại trừ đơn hàng đã hủy và hoàn trả
             ->sum('total_price');
-        
+
         return response()->json([
             'Doanh thu từ sách bán ra' => $totalRevenue
         ]);
@@ -58,63 +59,120 @@ class StatisticsController extends Controller
     // Doanh thu theo từng ngày/tháng/năm
     public function getRevenueByPeriod(Request $request)
     {
-        $groupBy = $request->input('group_by', 'month'); // mặc định group theo tháng
+        $groupBy = $request->input('group_by', 'month'); // default
         $year = $request->input('year');
         $month = $request->input('month');
-        
+
         $query = DB::table('orders')
-            ->whereNotIn('order_status_id', [7, 8]); // Loại trừ đơn hủy/hoàn trả
-        
-        // Áp dụng filter theo năm nếu có
+            ->whereNotIn('order_status_id', [7, 8]); // loại trừ đơn hủy/hoàn
+
         if ($year) {
             $query->whereYear('created_at', $year);
         }
-        
-        // Áp dụng filter theo tháng nếu có
+
         if ($month) {
             $query->whereMonth('created_at', $month);
         }
-        
+
         switch ($groupBy) {
             case 'day':
                 $results = $query->select(
                     DB::raw('DATE(created_at) as date'),
-                    DB::raw('YEAR(created_at) as year'),
-                    DB::raw('MONTH(created_at) as month'),
-                    DB::raw('DAY(created_at) as day'),
                     DB::raw('SUM(total_price) as revenue')
                 )
-                ->groupBy('date', 'year', 'month', 'day')
-                ->orderBy('date', 'asc')
-                ->get();
+                    ->groupBy('date')
+                    ->orderBy('date')
+                    ->get()
+                    ->map(function ($item) {
+                        return [
+                            'date' => $item->date,
+                            'revenue' => (float) $item->revenue,
+                        ];
+                    });
                 break;
-                
+
+            case 'week':
+                $results = $query->select(
+                    DB::raw('YEAR(created_at) as year'),
+                    DB::raw('WEEK(created_at, 1) as week'),
+                    DB::raw('MIN(DATE(created_at)) as week_start'),
+                    DB::raw('MAX(DATE(created_at)) as week_end'),
+                    DB::raw('SUM(total_price) as revenue')
+                )
+                    ->groupBy('year', 'week')
+                    ->orderBy('year')
+                    ->orderBy('week')
+                    ->get()
+                    ->map(function ($item) {
+                        $label = sprintf(
+                            'Tuần %d (%s - %s)',
+                            $item->week,
+                            Carbon::parse($item->week_start)->format('d/m'),
+                            Carbon::parse($item->week_end)->format('d/m')
+                        );
+                        return [
+                            'week' => $label,
+                            'revenue' => (float) $item->revenue,
+                        ];
+                    });
+                break;
+
             case 'month':
                 $results = $query->select(
                     DB::raw('YEAR(created_at) as year'),
                     DB::raw('MONTH(created_at) as month'),
                     DB::raw('SUM(total_price) as revenue')
                 )
-                ->groupBy('year', 'month')
-                ->orderBy('year', 'asc')
-                ->orderBy('month', 'asc')
-                ->get();
+                    ->groupBy('year', 'month')
+                    ->orderBy('year')
+                    ->orderBy('month')
+                    ->get()
+                    ->map(function ($item) {
+                        return [
+                            'month' => sprintf('%02d/%d', $item->month, $item->year),
+                            'revenue' => (float) $item->revenue,
+                        ];
+                    });
                 break;
-                
+            case 'quarter':
+                $results = $query->select(
+                    DB::raw('YEAR(created_at) as year'),
+                    DB::raw('QUARTER(created_at) as quarter'),
+                    DB::raw('SUM(total_price) as revenue')
+                )
+                    ->groupBy('year', 'quarter')
+                    ->orderBy('year')
+                    ->orderBy('quarter')
+                    ->get()
+                    ->map(function ($item) {
+                        return [
+                            'quarter' => 'Q' . $item->quarter . ' ' . $item->year,
+                            'revenue' => (float) $item->revenue,
+                        ];
+                    });
+                break;
             case 'year':
                 $results = $query->select(
                     DB::raw('YEAR(created_at) as year'),
                     DB::raw('SUM(total_price) as revenue')
                 )
-                ->groupBy('year')
-                ->orderBy('year', 'asc')
-                ->get();
+                    ->groupBy('year')
+                    ->orderBy('year')
+                    ->get()
+                    ->map(function ($item) {
+                        return [
+                            'year' => $item->year,
+                            'revenue' => (float) $item->revenue,
+                        ];
+                    });
                 break;
-                
+
             default:
-                return response()->json(['error' => 'Invalid group_by parameter. Accept: day, month, year'], 400);
+                return response()->json([
+                    'error' => 'Tham số group_by không hợp lệ. Giá trị hợp lệ: day, week, month, year'
+                ], 400);
         }
-        
+
         return response()->json($results);
     }
     // Số lượng khách hàng đã đặt hàng
@@ -124,7 +182,7 @@ class StatisticsController extends Controller
             ->whereNotNull('user_id')
             ->distinct('user_id')
             ->count('user_id');
-        
+
         return response()->json([
             'customer_count' => $customerCount
         ]);
@@ -136,7 +194,7 @@ class StatisticsController extends Controller
             ->where('del_flg', 0)
             ->where('status', 0) // Chỉ tính các bình luận active
             ->count();
-        
+
         return response()->json([
             'total_reviews' => $totalReviews
         ]);
@@ -153,7 +211,7 @@ class StatisticsController extends Controller
             )
             ->groupBy('order_statuses.id', 'order_statuses.name')
             ->get();
-        
+
         return response()->json($ordersByStatus);
     }
 }

@@ -109,29 +109,33 @@ class ProductVariantController extends Controller
     /**
      * Update the specified resource in storage.
      */
-    public function update(Request $request, string $code)
+    public function update(Request $request, string $code, int $cover_id)
     {
-        $product = Product::where('code', $code)->with('variants')->first();
-        if (!$product) {
-            return response()->json(['message' => 'Không tìm thấy sản phẩm'], 404);
-        }
+        // Lấy biến thể theo code sản phẩm và cover_id
+        $variant = ProductVariant::with('product')
+            ->whereHas('product', function ($query) use ($code): void {
+                $query->where('code', $code);
+            })
+            ->where('cover_id', $cover_id)
+            ->first();
 
-        $variant = $product->variants->first();
         if (!$variant) {
-            return response()->json(['message' => 'Không tìm thấy biến thể sản phẩm'], 404);
+            return response()->json([
+                'message' => "Không tìm thấy biến thể $cover_id của sản phẩm: $code"
+            ], 404);
         }
 
         $request->validate([
-            'cover_id' => 'required',
+            'cover_id' => 'required|integer',
             'quantity' => 'required|integer|min:0',
-            'price' => 'required|min:0',
-            'promotion' => 'nullable|min:0',
+            'price' => 'required|numeric|min:0',
+            'promotion' => 'nullable|numeric|min:0',
         ]);
 
         $variant->update($request->only(['cover_id', 'quantity', 'price', 'promotion']));
 
         return response()->json([
-            'message' => 'Sửa thành công',
+            'message' => 'Cập nhật biến thể thành công!',
             'variant' => $variant
         ]);
     }

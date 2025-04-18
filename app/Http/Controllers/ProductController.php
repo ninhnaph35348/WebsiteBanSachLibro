@@ -286,10 +286,21 @@ class ProductController extends Controller
             'status' => 'required|in:in_stock,out_stock',
         ]);
 
+        // Cập nhật status sản phẩm
         $product->update(['status' => $validated['status']]);
 
+        // Nếu sản phẩm bị ẩn -> cập nhật tất cả biến thể về del_flg = 1 (ẩn)
+        if ($validated['status'] === 'out_stock') {
+            $product->variants()->update(['del_flg' => 1]);
+        } else {
+            // Nếu sản phẩm được hiển thị lại -> cập nhật tất cả biến thể về del_flg = 0 (hiện)
+            $product->variants()->update(['del_flg' => 0]); // Biến thể hiển thị
+        }
+
         return response()->json([
-            'message' => $validated['status'] === 'out_stock' ? 'Sản phẩm đã bị ẩn' : 'Sản phẩm đã được hiển thị',
+            'message' => $validated['status'] === 'out_stock'
+                ? 'Sản phẩm và các biến thể đã bị ẩn'
+                : 'Sản phẩm đã được hiển thị',
         ], 200);
     }
     public function latest()

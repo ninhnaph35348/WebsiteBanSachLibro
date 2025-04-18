@@ -129,6 +129,7 @@ Route::middleware(['auth:sanctum',  'role:s.admin|admin'])->group(function () {
         Route::get('/product-variant/{productCode}/cover/{coverId}', [ProductVariantController::class, 'getByProductAndCover']);
         Route::post('/', [ProductVariantController::class, 'store']);
         Route::put('/edit/{id}/cover/{coverId}', [ProductVariantController::class, 'update']);
+        Route::put('/update-status/{code}', [ProductVariantController::class, 'updateProductVariantStatus']);
         Route::put('/{id}', [ProductVariantController::class, 'destroy']);
     });
     Route::prefix('orders')->group(function () {

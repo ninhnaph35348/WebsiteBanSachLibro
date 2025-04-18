@@ -15,7 +15,6 @@ class ProductVariantController extends Controller
     public function index()
     {
         $products = ProductVariant::with(['product', 'cover'])
-            ->where('del_flg', 0)
             ->orderBy('id', 'desc')
             ->get();
         return VariantResoure::collection($products);
@@ -139,11 +138,7 @@ class ProductVariantController extends Controller
             'variant' => $variant
         ]);
     }
-
-    /**
-     * Remove the specified resource from storage.
-     */
-    public function destroy(string $code)
+    public function updateProductVariantStatus(Request $request, $code)
     {
         $product = Product::where('code', $code)->with('variants')->first();
         if (!$product) {
@@ -154,10 +149,36 @@ class ProductVariantController extends Controller
         if (!$variant) {
             return response()->json(['message' => 'Không tìm thấy biến thể sản phẩm'], 404);
         }
+        $validated = $request->validate([
+            'del_flg' => 'required|in:0,1',
+        ]);
 
-        // Update del_flg thành 1 để ẩn
-        $variant->update(['del_flg' => 1]);
+        $variant->update(['del_flg' => $validated['del_flg']]);
 
-        return response()->json(['message' => 'Ẩn thành công']);
+        return response()->json([
+            'message' => $validated['del_flg'] == 1
+                ? 'Biến thể sản phẩm đã bị ẩn'
+                : 'Biến thể sản phẩm đã được hiển thị',
+        ], 200);
     }
+    /**
+     * Remove the specified resource from storage.
+     */
+    // public function destroy(string $code)
+    // {
+    //     $product = Product::where('code', $code)->with('variants')->first();
+    //     if (!$product) {
+    //         return response()->json(['message' => 'Không tìm thấy sản phẩm'], 404);
+    //     }
+
+    //     $variant = $product->variants->first();
+    //     if (!$variant) {
+    //         return response()->json(['message' => 'Không tìm thấy biến thể sản phẩm'], 404);
+    //     }
+
+    //     // Update del_flg thành 1 để ẩn
+    //     $variant->update(['del_flg' => 1]);
+
+    //     return response()->json(['message' => 'Ẩn thành công']);
+    // }
 }

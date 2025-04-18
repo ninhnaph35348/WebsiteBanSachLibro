@@ -149,9 +149,17 @@ class ProductVariantController extends Controller
         if (!$variant) {
             return response()->json(['message' => 'Không tìm thấy biến thể sản phẩm'], 404);
         }
+
         $validated = $request->validate([
             'del_flg' => 'required|in:0,1',
         ]);
+
+        // Nếu product đã ẩn (status = out_stock) và request muốn hiển thị lại biến thể (del_flg = 0)
+        if ($product->status === 'out_stock' && $validated['del_flg'] == 0) {
+            return response()->json([
+                'message' => 'Không thể hiển thị biến thể vì sản phẩm đang bị ẩn'
+            ], 403);
+        }
 
         $variant->update(['del_flg' => $validated['del_flg']]);
 
@@ -161,6 +169,7 @@ class ProductVariantController extends Controller
                 : 'Biến thể sản phẩm đã được hiển thị',
         ], 200);
     }
+
     /**
      * Remove the specified resource from storage.
      */

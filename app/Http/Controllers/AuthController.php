@@ -88,7 +88,7 @@ class AuthController extends Controller
                 ]);
 
                 return response()->json([
-                    'message' => ' Tài khoản của bạn đã bị khóa hoặc nhập sai quá nhiều lần.',
+                    'message' => 'Tài khoản của bạn đã bị khóa hoặc nhập sai quá nhiều lần.',
                     'status' => 'inactive',
                     'failed_attempts' => $user->failed_attempts
                 ], 403);

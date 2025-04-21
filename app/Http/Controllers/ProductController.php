@@ -349,9 +349,11 @@ class ProductController extends Controller
     {
         // Lấy danh sách sản phẩm bán chạy nhất
         $bestSellingVariants = DB::table('order_details')
-            ->select('order_details.product_variant_id', DB::raw('SUM(order_details.quantity) as total_sold'))
+            ->join('orders', 'order_details.order_id', '=', 'orders.id')
+            ->where('orders.order_status_id', 6) // Chỉ lấy đơn hàng đã hoàn tất
+            ->select('order_details.product_variant_id', DB::raw('SUM(order_details.quantity) as sold_quantity'))
             ->groupBy('order_details.product_variant_id')
-            ->orderByDesc('total_sold')
+            ->orderByDesc('sold_quantity')
             ->take(10)
             ->get();
 
@@ -365,7 +367,7 @@ class ProductController extends Controller
             ->get();
 
         $result = $variants->map(function ($variant) use ($bestSellingVariants) {
-            $totalSold = $bestSellingVariants->firstWhere('product_variant_id', $variant->id)->total_sold ?? 0;
+            $soldQuantity = $bestSellingVariants->firstWhere('product_variant_id', $variant->id)->sold_quantity ?? 0;
 
             return [
                 'id' => $variant->id,
@@ -374,7 +376,7 @@ class ProductController extends Controller
                 'promotion' => $variant->promotion,
                 'cover_id' => $variant->cover_id,
                 'cover' => $variant->cover ? $variant->cover->type : null,
-                'total_sold' => $totalSold,
+                'sold_quantity' => $soldQuantity,
                 'product' => $variant->product ? [
                     'code' => $variant->product->code,
                     'title' => $variant->product->title,

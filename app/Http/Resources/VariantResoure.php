@@ -19,9 +19,11 @@ class VariantResoure extends JsonResource
             'cover_id' => $this->cover ? $this->cover->id : null,
             'cover' => $this->cover ? $this->cover->type : null,
             'sold_quantity' => $this->soldQuantity($this->product->code),
+            'del_flg' => $this->del_flg,
             'product' => $this->product ? [
                 'code' => $this->product->code,
                 'title' => $this->product->title,
+                'status' => $this->product->status,
                 'author' => $this->product->author ? $this->product->author->name : null,
                 'publisher' => $this->product->publisher ? $this->product->publisher->name : null,
                 'description' => $this->product->description ? $this->product->description : null,

@@ -82,7 +82,6 @@ class UserController extends Controller
             ], 500);
         }
     }
-    //
     // Cập nhật user
     public function update(Request $request, $id)
     {
@@ -125,6 +124,12 @@ class UserController extends Controller
                 $val['avatar'] = $request->file('avatar')->store('uploads/user', 'public');
             }
 
+            // ✅ Nếu status được cập nhật thành 'active', reset failed_attempts
+            if (isset($val['status']) && $val['status'] === 'active') {
+                $user->failed_attempts = 0;
+            }
+            $user->update($val);
+            
             // ✅ Cập nhật thông tin sản phẩm
             $user->update($val);
 

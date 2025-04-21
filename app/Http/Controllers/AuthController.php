@@ -50,61 +50,76 @@ class AuthController extends Controller
     }
     public function login(Request $request)
     {
+        // Kiểm tra các trường hợp đầu vào
         $validator = Validator::make($request->all(), [
             'email' => 'required|email',
             'password' => 'required|string|min:6',
+            'loginType' => 'required|in:client,admin,sadmin',
         ]);
 
         if ($validator->fails()) {
             return response()->json(['message' => $validator->errors()], 400);
         }
 
+        // Tìm kiếm người dùng theo email
         $user = User::where('email', $request->email)->first();
 
-        if (!$user) {
-            return response()->json(['message' => 'Email hoặc mật khẩu không chính xác'], 401);
+        // Nếu không có user hoặc mật khẩu không đúng
+        if (!$user || !Hash::check($request->password, $user->password)) {
+            if ($user) {
+                $user->failed_attempts += 1;
+
+                // Khóa tài khoản nếu nhập sai quá 5 lần
+                if ($user->failed_attempts >= 5) {
+                    $user->status = 'inactive';
+                    $user->save();
+
+                    DB::table('logs')->insert([
+                        'message' => "Tài khoản {$user->email} bị khóa do nhập sai quá nhiều lần",
+                        'created_at' => now(),
+                    ]);
+
+                    return response()->json([
+                        'message' => 'Tài khoản của bạn đã bị khóa',
+                        'status' => 'inactive',
+                        'failed_attempts' => $user->failed_attempts
+                    ], 403);
+                }
+
+                $user->save();
+            }
+
+            return response()->json([
+                'message' => 'Email hoặc mật khẩu không chính xác',
+            ], 401);
         }
 
-        // Kiểm tra nếu tài khoản bị khóa
+        // Kiểm tra trạng thái tài khoản (có bị khóa không)
         if ($user->status === 'inactive') {
             return response()->json([
-                'message' => 'Tài khoản của bạn đã bị khóa do nhập sai quá nhiều lần.',
+                'message' => 'Tài khoản của bạn đã bị khóa',
                 'status' => 'inactive'
             ], 403);
         }
 
-        if (!Auth::attempt($request->only('email', 'password'))) {
-            $user->failed_attempts += 1;
-
-            // Khóa tài khoản nếu sai quá 5 lần
-            if ($user->failed_attempts >= 5) {
-                $user->status = 'inactive';
-                $user->save();
-
-                // Ghi log khóa tài khoản
-                DB::table('logs')->insert([
-                    'message' => "Tài khoản {$user->email} bị khóa do nhập sai quá nhiều lần",
-                    'created_at' => now(),
-                ]);
-
-                return response()->json([
-                    'message' => 'Tài khoản của bạn đã bị khóa hoặc nhập sai quá nhiều lần.',
-                    'status' => 'inactive',
-                    'failed_attempts' => $user->failed_attempts
-                ], 403);
-            }
-
-            $user->save();
+        // Kiểm tra nếu đăng nhập là admin nhưng người dùng là client
+        if ($request->loginType === ['sadmin', 'admin'] && $user->role === 'client') {
             return response()->json([
-                'message' => 'Email hoặc mật khẩu không chính xác',
-                'failed_attempts' => $user->failed_attempts
-            ], 401);
+                'message' => 'Tài khoản của bạn không có quyền đăng nhập quản trị',
+            ], 403);
         }
 
-        // Reset lại failed_attempts nếu đăng nhập thành công
+        // Nếu người dùng là admin hoặc sadmin thì có thể đăng nhập vào trang admin hoặc client
+        if (($user->role === 'admin' || $user->role === 'sadmin')) {
+            // Được phép đăng nhập vào cả trang admin và client
+        }
+
+        // Đăng nhập thành công
+        Auth::login($user);
         $user->failed_attempts = 0;
         $user->save();
 
+        // Tạo token
         $token = $user->createToken('auth_token')->plainTextToken;
 
         return response()->json([

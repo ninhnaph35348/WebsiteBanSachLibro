@@ -53,7 +53,7 @@ Route::middleware(['auth:sanctum'])->group(function () {
     Route::get('/order_detail', [OrderDetailController::class, 'index']);
     Route::get('/order_detail/{code_order}', [OrderDetailController::class, 'show']);
 });
-
+Route::middleware('auth:sanctum')->put('/me', [UserController::class, 'updateMe']);
 Route::middleware('auth:sanctum')->get('/me', function (Request $request) {
     return response()->json(['user' => $request->user()]);
 });
@@ -208,3 +208,5 @@ Route::get('/products-bestsellers', [ProductController::class, 'bestSellers']);
 // VnPay
 Route::post('/vnpay-create', [VnPayController::class, 'createPayment']);
 Route::get('/vnpay-return', [VnPayController::class, 'vnpayReturn']);
+
+

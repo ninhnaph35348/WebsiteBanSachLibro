@@ -129,7 +129,7 @@ class UserController extends Controller
                 $user->failed_attempts = 0;
             }
             $user->update($val);
-            
+
             // ✅ Cập nhật thông tin sản phẩm
             $user->update($val);
 
@@ -141,6 +141,36 @@ class UserController extends Controller
         } catch (\Exception $e) {
             return response()->json([
                 'message' => 'Lỗi khi sửa user',
+                'error' => $e->getMessage(),
+            ], 500);
+        }
+    }
+    public function updateMe(Request $request)
+    {
+        try {
+            $user = $request->user(); // Lấy user từ token
+            if (!$user) {
+                return response()->json(['message' => 'Người dùng không tồn tại'], 404);
+            }
+
+            $val = $request->validate([
+                'fullname' => 'string|max:255',
+                'phone' => 'nullable|regex:/^[0-9]+$/|max:20',
+                'address' => 'nullable|string|max:255',
+                'birth_date' => 'nullable|date',
+                'status' => 'string',
+                'role' => 'string',
+            ]);
+
+            $user->update($val);
+
+            return response()->json([
+                'message' => 'Cập nhật thành công',
+                'user' => $user
+            ]);
+        } catch (\Exception $e) {
+            return response()->json([
+                'message' => 'Lỗi khi cập nhật thông tin',
                 'error' => $e->getMessage(),
             ], 500);
         }

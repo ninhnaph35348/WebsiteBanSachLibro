@@ -26,7 +26,7 @@ class OrderDetailController extends Controller
     public function show(Request $request, $code_order)
     {
         // Lấy user_id từ request
-        $userId = $request->user()->id;
+        $userId = $request->user()->id ?? null;
 
         // Tìm đơn hàng theo mã đơn hàng và user_id
         $order = Order::with('orderDetails.productVariant.product')

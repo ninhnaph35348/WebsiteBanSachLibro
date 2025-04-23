@@ -154,6 +154,8 @@ Route::middleware(['auth:sanctum',  'role:s.admin|admin'])->group(function () {
     Route::get('status', [OrderStatusController::class, 'getAllOrderStatus']);
 });
 // Get All
+Route::get('vouchers/', [VoucherController::class, 'index']);
+
 Route::get('users/', [UserController::class, 'index']);
 Route::get('categories/', [CategoryController::class, 'index']);
 Route::get('covers/', [CoverController::class, 'index']);
@@ -167,6 +169,7 @@ Route::get('orders/', [OrderController::class, 'index']);
 Route::get('/review-products/{productCode}', [ReviewController::class, 'getReviewByProductId']);
 Route::get('product_variants_toprate/', [ProductVariantController::class, 'getTop5ProductVarriantByRating']);
 // Get Detail
+Route::get('vouchers/{id}', [VoucherController::class, 'show']);
 Route::get('users/{id}', [UserController::class, 'show']);
 Route::get('categories/{id}', [CategoryController::class, 'show']);
 Route::get('covers/{id}', [CoverController::class, 'show']);
@@ -208,5 +211,3 @@ Route::get('/products-bestsellers', [ProductController::class, 'bestSellers']);
 // VnPay
 Route::post('/vnpay-create', [VnPayController::class, 'createPayment']);
 Route::get('/vnpay-return', [VnPayController::class, 'vnpayReturn']);
-
-

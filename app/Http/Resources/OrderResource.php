@@ -24,8 +24,10 @@ class OrderResource extends JsonResource
             'shipping_address' => $this->shipping_address,
             'status' => $this->status ? $this->status->name : null,
             'voucher' => $this->voucher ? $this->voucher->code : null,
+            'voucher_discount' => $this->voucher ? $this->voucher->discount : null,
+            'voucher_discount_type' => $this->voucher ? $this->voucher->discount_type : null,
             'user' => $this->user ? $this->user->username : null,
-            'created_at' => $this->created_at->format('H:i d/m/Y'),
+            'created_at' => $this->created_at->format('d/m/Y'),
             'order_details' => OrderDetailResource::collection($this->orderDetails),
         ];
     }

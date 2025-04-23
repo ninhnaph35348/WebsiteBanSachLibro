@@ -29,7 +29,7 @@ class OrderDetailController extends Controller
         $userId = $request->user()->id;
 
         // Tìm đơn hàng theo mã đơn hàng và user_id
-        $order = Order::with('orderDetails.productVariant')
+        $order = Order::with('orderDetails.productVariant.product')
             ->where('code_order', $code_order)
             ->where('user_id', $userId)
             ->first();
@@ -38,6 +38,15 @@ class OrderDetailController extends Controller
             return response()->json(['message' => 'Không tìm thấy đơn hàng'], 404);
         }
 
-        return new OrderResource($order);
+        // Tính tổng tiền sản phẩm (chưa gồm mã giảm giá, phí vận chuyển)
+        $totalProductPrice = $order->orderDetails->sum(function ($detail) {
+            $price = $detail->productVariant->promotion ?? $detail->productVariant->price;
+            return $price * $detail->quantity;
+        });
+
+        return response()->json([
+            'order' => new OrderResource($order),
+            'total_product_price' => $totalProductPrice,
+        ]);
     }
 }

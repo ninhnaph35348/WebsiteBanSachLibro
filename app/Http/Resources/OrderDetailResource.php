@@ -17,7 +17,7 @@ class OrderDetailResource extends JsonResource
             'price_product' => $this->productVariant->promotion ?? $this->productVariant->price,
             'image' => $this->productVariant->product->image,
             'quantity' => $this->quantity,
-            'total_line' => $this->quantity * $this->productVariant->promotion ?? $this->productVariant->price,
+            'total_line' => $this->quantity * ($this->productVariant->promotion !== null ? $this->productVariant->promotion : $this->productVariant->price),
         ];
     }
 }

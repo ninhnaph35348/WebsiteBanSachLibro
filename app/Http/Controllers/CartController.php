@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Http\Resources\OrderResource;
+use App\Mail\OrderMail;
 use Illuminate\Http\Request;
 use App\Models\ProductVariant;
 use App\Models\Order;
@@ -10,6 +11,7 @@ use App\Models\OrderDetail;
 use App\Models\Voucher;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Str;
 
 class CartController extends Controller
@@ -183,7 +185,11 @@ class CartController extends Controller
             DB::table('order_details')->insert($orderDetails);
 
             DB::commit();
-
+            try {
+                Mail::to($order->user_email)->send(new OrderMail($order));
+            } catch (\Exception $e) {
+                Log::error('Lỗi gửi mail: ' . $e->getMessage());
+            }
             return response()->json([
                 'message' => 'Đặt hàng thành công!',
                 'total_price_cart' => $totalPrice,
@@ -196,7 +202,7 @@ class CartController extends Controller
                     'user_email' => $order->user_email,
                     'user_phone' => $order->user_phone,
                     'user_address' => $order->user_address,
-                    'payment_method' => $order->payment_method,
+                    'payment_method' => $order->payment_method == 0 ? 'COD' : 'VNPay',
                     'shipping_name' => $order->shipping_name,
                     'shipping_email' => $order->shipping_email,
                     'shipping_phone' => $order->shipping_phone,

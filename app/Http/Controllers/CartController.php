@@ -82,12 +82,16 @@ class CartController extends Controller
                 $voucher = Voucher::where('code', $request->voucher_code)
                     ->where('valid_from', '<=', now())
                     ->where('valid_to', '>=', now())
+                    ->where('status', 0) // chỉ lấy voucher còn hiệu lực
                     ->first();
 
                 if (!$voucher) {
                     return response()->json(['message' => 'Mã giảm giá không hợp lệ hoặc đã hết hạn!'], 400);
                 }
 
+                if ($voucher->quantity <= 0) {
+                    return response()->json(['message' => 'Mã giảm giá đã hết lượt sử dụng!'], 400);
+                }
                 $voucherId = $voucher->id;
 
                 if ($user) {

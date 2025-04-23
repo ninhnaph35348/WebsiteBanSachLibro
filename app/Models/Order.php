@@ -26,6 +26,7 @@ class Order extends Model
         'shipping_name',
         'shipping_phone',
         'shipping_address',
+        'shipping_email'
     ];
 
     // Liên kết với OrderStatus
@@ -51,5 +52,4 @@ class Order extends Model
     {
         return $this->hasMany(OrderDetail::class, 'order_id');
     }
-
 }

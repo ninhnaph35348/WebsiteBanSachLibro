@@ -32,6 +32,7 @@ class CartController extends Controller
                 'user_phone' => 'nullable|string|max:20',
                 'user_address' => 'nullable|string|max:500',
                 'shipping_name' => 'nullable|string|max:255',
+                'shipping_email' => 'nullable|email|max:255',
                 'shipping_phone' => 'nullable|string|max:20',
                 'shipping_address' => 'nullable|string|max:500',
             ]);
@@ -138,23 +139,24 @@ class CartController extends Controller
                 'payment_method' => $request->payment_method,
                 'voucher_id' => $voucherId,
                 'user_id' => $user ? $user->id : null,
-                'shipping_name' => $request->shipping_name ?? ($user ? $user->username : null), // Lưu tên người nhận
+                'shipping_name' => $request->shipping_name ?? ($user ? $user->fullname : null), // Lưu tên người nhận
+                'shipping_email' => $request->shipping_email ?? ($user ? $user->email : null), // Lưu email người nhận
                 'shipping_phone' => $request->shipping_phone ?? ($user ? $user->phone : null), // Lưu số điện thoại người nhận
                 'shipping_address' => $request->shipping_address ?? ($user ? $user->address : null), // Lưu địa chỉ người nhận
             ];
 
             // Nếu đã đăng nhập, bạn có thể lấy thêm thông tin người dùng (người đặt)
             if ($user) {
-                $orderData['user_name'] = $user->username; // Lưu tên người đặt (người dùng)
+                $orderData['user_name'] = $user->fullname; // Lưu tên người đặt (người dùng)
                 $orderData['user_email'] = $user->email; // Lưu email người đặt
                 $orderData['user_phone'] = $user->phone; // Lưu số điện thoại người đặt
                 $orderData['user_address'] = $user->address; // Lưu địa chỉ người đặt
             } else {
                 // Nếu chưa đăng nhập, lấy từ request
-                $orderData['user_name'] = $request->user_name;
-                $orderData['user_email'] = $request->user_email;
-                $orderData['user_phone'] = $request->user_phone;
-                $orderData['user_address'] = $request->user_address;
+                $orderData['user_name'] = $request->user_name ?? $request->shipping_name;
+                $orderData['user_email'] = $request->user_email ?? $request->shipping_email;
+                $orderData['user_phone'] = $request->user_phone ?? $request->shipping_phone;
+                $orderData['user_address'] = $request->user_address ?? $request->shipping_address;
             }
 
             // Tạo đơn hàng
@@ -196,6 +198,7 @@ class CartController extends Controller
                     'user_address' => $order->user_address,
                     'payment_method' => $order->payment_method,
                     'shipping_name' => $order->shipping_name,
+                    'shipping_email' => $order->shipping_email,
                     'shipping_phone' => $order->shipping_phone,
                     'shipping_address' => $order->shipping_address,
                     'status' => $order->status ? $order->status->name : null,

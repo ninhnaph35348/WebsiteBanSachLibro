@@ -22,6 +22,7 @@ class OrderResource extends JsonResource
             'shipping_name' => $this->shipping_name,
             'shipping_phone' => $this->shipping_phone,
             'shipping_address' => $this->shipping_address,
+            'shipping_email' => $this->shipping_email,
             'status' => $this->status ? $this->status->name : null,
             'voucher' => $this->voucher ? $this->voucher->code : null,
             'voucher_discount' => $this->voucher ? $this->voucher->discount : null,

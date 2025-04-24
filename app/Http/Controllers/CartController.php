@@ -27,7 +27,7 @@ class CartController extends Controller
                 'cart.*.quantity' => 'required|integer|min:1',
                 'note' => 'nullable|string',
                 'payment_method' => 'required',
-                'voucher_code' => 'nullable|string|exists:vouchers,code',
+                'voucher_code' => 'nullable|string',
                 'shipping_fee' => 'nullable|numeric|min:0',
                 'user_name' => 'nullable|string|max:255',
                 'user_email' => 'nullable|email|max:255',
@@ -70,62 +70,20 @@ class CartController extends Controller
 
             // Phí vận chuyển (nếu không có thì mặc định = 0)
             $shippingFee = $request->shipping_fee ?? 0;
+            $user = auth('api')->user();
 
             // Áp dụng voucher (nếu có)
             $discount = 0;
             $voucherId = null;
 
-            // Kiểm tra người dùng có đăng nhập không
-            $user = auth('api')->user();
-
-            if ($request->voucher_code && !$user) {
-                return response()->json(['message' => 'Bạn cần đăng nhập để sử dụng mã giảm giá!'], 401);
-            }
-
             if ($request->voucher_code) {
-                $voucher = Voucher::where('code', $request->voucher_code)
-                    ->where('valid_from', '<=', now())
-                    ->where('valid_to', '>=', now())
-                    ->where('status', 0) // chỉ lấy voucher còn hiệu lực
-                    ->first();
-
-                if (!$voucher) {
-                    return response()->json(['message' => 'Mã giảm giá không hợp lệ hoặc đã hết hạn!'], 400);
-                }
-
-                if ($voucher->quantity <= 0) {
-                    return response()->json(['message' => 'Mã giảm giá đã hết lượt sử dụng!'], 400);
-                }
-                $voucherId = $voucher->id;
-
-                if ($user) {
-                    // Kiểm tra user đã dùng voucher này chưa
-                    $hasUsed = DB::table('voucher_user')
-                        ->where('user_id', $user->id)
-                        ->where('voucher_id', $voucherId)
-                        ->where('status', 'success') // đã dùng thành công
-                        ->exists();
-
-                    if ($hasUsed) {
-                        return response()->json(['message' => 'Bạn đã sử dụng mã giảm giá này rồi!'], 400);
-                    }
-                }
-
-                // Tính giảm giá
-                if ($voucher->discount_type === 'percent') {
-                    $discount = $totalProductPrice * ($voucher->discount / 100);
-                    if ($voucher->max_discount) {
-                        $discount = min($discount, $voucher->max_discount);
-                    }
-                } elseif ($voucher->discount_type === 'fixed') {
-                    $discount = $voucher->discount;
-                } else {
-                    return response()->json(['message' => 'Loại giảm giá không hợp lệ!'], 400);
-                }
-
-                // Kiểm tra đơn hàng có đạt min_order_value không
-                if ($voucher->min_order_value && $totalProductPrice < $voucher->min_order_value) {
-                    return response()->json(['message' => 'Đơn hàng chưa đủ điều kiện áp dụng voucher.'], 400);
+                try {
+                    $result = $this->applyVoucher($request->voucher_code, $user, $totalProductPrice);
+                    $discount = $result['discount'];
+                    $voucher = $result['voucher'];
+                    $voucherId = $voucher->id;
+                } catch (\Exception $e) {
+                    return response()->json(['message' => $e->getMessage()], 400);
                 }
             }
 
@@ -258,13 +216,13 @@ class CartController extends Controller
                 return response()->json(['message' => 'Không có chi tiết đơn hàng để hủy!'], 400);
             }
 
-            foreach ($orderDetails as $detail) {
-                $productVariant = $detail->productVariant;
-                if ($productVariant) {
-                    $productVariant->quantity += $detail->quantity; // Cộng lại số lượng sản phẩm
-                    $productVariant->save();
-                }
-            }
+            // foreach ($orderDetails as $detail) {
+            //     $productVariant = $detail->productVariant;
+            //     if ($productVariant) {
+            //         $productVariant->quantity += $detail->quantity; // Cộng lại số lượng sản phẩm
+            //         $productVariant->save();
+            //     }
+            // }
 
             // Hoàn lại voucher nếu có
             if ($order->voucher_id) {
@@ -316,5 +274,59 @@ class CartController extends Controller
             DB::rollBack();
             return response()->json(['message' => 'Hủy đơn thất bại!', 'error' => $e->getMessage()], 500);
         }
+    }
+
+
+    private function applyVoucher($code, $user, $totalProductPrice)
+    {
+        $voucher = Voucher::where('code', $code)
+            ->where('valid_from', '<=', now())
+            ->where('valid_to', '>=', now())
+            ->where('status', 0)
+            ->first();
+
+        if (!$voucher) {
+            throw new \Exception('Mã giảm giá không hợp lệ hoặc đã hết hạn!');
+        }
+
+        if ($voucher->quantity <= 0) {
+            throw new \Exception('Mã giảm giá đã hết lượt sử dụng!');
+        }
+
+        if ($user) {
+            $hasUsed = DB::table('voucher_user')
+                ->where('user_id', $user->id)
+                ->where('voucher_id', $voucher->id)
+                ->where('status', 'success')
+                ->exists();
+
+            if ($hasUsed) {
+                throw new \Exception('Bạn đã sử dụng mã giảm giá này rồi!');
+            }
+        } else {
+            throw new \Exception('Bạn cần đăng nhập để sử dụng mã giảm giá!');
+        }
+
+        // Kiểm tra đơn hàng có đạt min_order_value không
+        if ($voucher->min_order_value && $totalProductPrice < $voucher->min_order_value) {
+            throw new \Exception('Đơn hàng chưa đủ điều kiện áp dụng voucher.');
+        }
+
+        $discount = 0;
+        if ($voucher->discount_type === 'percent') {
+            $discount = $totalProductPrice * ($voucher->discount / 100);
+            if ($voucher->max_discount) {
+                $discount = min($discount, $voucher->max_discount);
+            }
+        } elseif ($voucher->discount_type === 'fixed') {
+            $discount = $voucher->discount;
+        } else {
+            throw new \Exception('Loại giảm giá không hợp lệ!');
+        }
+
+        return [
+            'discount' => $discount,
+            'voucher' => $voucher,
+        ];
     }
 }

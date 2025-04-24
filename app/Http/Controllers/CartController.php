@@ -54,16 +54,17 @@ class CartController extends Controller
                     return response()->json(['message' => "Sản phẩm {$variant->product->title} không đủ hàng"], 400);
                 }
 
-                // Lấy giá khuyến mãi nếu có
                 $price_product = $variant->promotion ?? $variant->price;
                 $subtotal = $price_product * $item['quantity'];
                 $totalProductPrice += $subtotal;
 
-                // Chuẩn bị dữ liệu cho order_details
+                // 👉 Thêm dòng hard_products và hard_price_time ở đây
                 $orderDetails[] = [
                     'product_variant_id' => $variant->id,
                     'quantity' => $item['quantity'],
                     'total_line' => $subtotal,
+                    'hard_products' => $variant->product->title, // tên sản phẩm cứng
+                    'hard_price_time' => $price_product, // giá tại thời điểm thanh toán
                 ];
             }
 

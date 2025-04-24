@@ -21,6 +21,7 @@ class VariantResoure extends JsonResource
             'sold_quantity' => $this->soldQuantity($this->product->code),
             'del_flg' => $this->del_flg,
             'product' => $this->product ? [
+                'id' => $this->product->id,
                 'code' => $this->product->code,
                 'title' => $this->product->title,
                 'status' => $this->product->status,

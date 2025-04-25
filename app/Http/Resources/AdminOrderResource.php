@@ -20,6 +20,7 @@ class AdminOrderResource extends JsonResource
             'user_phone' => $this->user_phone,
             'user_address' => $this->user_address,
             'shipping_name' => $this->shipping_name,
+            'shipping_email' => $this->shipping_email,
             'shipping_phone' => $this->shipping_phone,
             'shipping_address' => $this->shipping_address,
             'status' => $this->status ? $this->status->name : null,

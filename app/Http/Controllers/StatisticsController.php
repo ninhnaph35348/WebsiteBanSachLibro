@@ -56,12 +56,14 @@ class StatisticsController extends Controller
             'Doanh thu từ sách bán ra' => $totalRevenue
         ]);
     }
-    // Doanh thu theo từng ngày/tháng/năm
+    // Doanh thu theo khoảng thời gian
     public function getRevenueByPeriod(Request $request)
     {
         $groupBy = $request->input('group_by', 'month'); // default
         $year = $request->input('year');
         $month = $request->input('month');
+        $fromDate = $request->input('from_date'); // yyyy-mm-dd
+        $toDate = $request->input('to_date');     // yyyy-mm-dd
 
         $query = DB::table('orders')
             ->whereNotIn('order_status_id', [7, 8]); // loại trừ đơn hủy/hoàn
@@ -74,107 +76,199 @@ class StatisticsController extends Controller
             $query->whereMonth('created_at', $month);
         }
 
+        if ($fromDate && $toDate) {
+            $query->whereBetween('created_at', [$fromDate, $toDate]);
+        } elseif ($fromDate) {
+            $query->whereDate('created_at', '>=', $fromDate);
+        } elseif ($toDate) {
+            $query->whereDate('created_at', '<=', $toDate);
+        }
+
+        // Parse dates for reusability
+        $from = Carbon::parse($fromDate);
+        $to = Carbon::parse($toDate);
+
         switch ($groupBy) {
+            case 'weekday':
+                $rawResults = $query->select(
+                    DB::raw('WEEKDAY(created_at) as weekday'),
+                    DB::raw('SUM(total_price) as revenue')
+                )
+                    ->groupBy('weekday')
+                    ->orderBy('weekday')
+                    ->get()
+                    ->mapWithKeys(function ($item) {
+                        return [
+                            $item->weekday => (float) $item->revenue,
+                        ];
+                    });
+
+                $weekdayMap = [
+                    0 => 'Thứ Hai',
+                    1 => 'Thứ Ba',
+                    2 => 'Thứ Tư',
+                    3 => 'Thứ Năm',
+                    4 => 'Thứ Sáu',
+                    5 => 'Thứ Bảy',
+                    6 => 'Chủ Nhật',
+                ];
+
+                $results = [];
+                foreach ($weekdayMap as $i => $label) {
+                    $results[] = [
+                        'weekday' => $label,
+                        'revenue' => $rawResults[$i] ?? 0,
+                    ];
+                }
+                break;
+
             case 'day':
-                $results = $query->select(
+                $rawResults = $query->select(
                     DB::raw('DATE(created_at) as date'),
                     DB::raw('SUM(total_price) as revenue')
                 )
                     ->groupBy('date')
                     ->orderBy('date')
                     ->get()
-                    ->map(function ($item) {
+                    ->mapWithKeys(function ($item) {
                         return [
-                            'date' => $item->date,
-                            'revenue' => (float) $item->revenue,
+                            $item->date => (float) $item->revenue,
                         ];
                     });
+
+                $results = [];
+                for ($date = $from->copy(); $date->lte($to); $date->addDay()) {
+                    $formattedDate = $date->toDateString();
+                    $results[] = [
+                        'date' => $formattedDate,
+                        'revenue' => $rawResults[$formattedDate] ?? 0,
+                    ];
+                }
                 break;
 
             case 'week':
-                $results = $query->select(
+                $rawResults = $query->select(
                     DB::raw('YEAR(created_at) as year'),
                     DB::raw('WEEK(created_at, 1) as week'),
-                    DB::raw('MIN(DATE(created_at)) as week_start'),
-                    DB::raw('MAX(DATE(created_at)) as week_end'),
                     DB::raw('SUM(total_price) as revenue')
                 )
                     ->groupBy('year', 'week')
-                    ->orderBy('year')
-                    ->orderBy('week')
                     ->get()
-                    ->map(function ($item) {
-                        $label = sprintf(
-                            'Tuần %d (%s - %s)',
-                            $item->week,
-                            Carbon::parse($item->week_start)->format('d/m'),
-                            Carbon::parse($item->week_end)->format('d/m')
-                        );
+                    ->mapWithKeys(function ($item) {
+                        $key = $item->year . '-' . str_pad($item->week, 2, '0', STR_PAD_LEFT);
                         return [
-                            'week' => $label,
-                            'revenue' => (float) $item->revenue,
+                            $key => (float) $item->revenue,
                         ];
                     });
+
+                $results = [];
+                while ($from->lte($to)) {
+                    $year = $from->year;
+                    $week = $from->isoWeek();
+                    $start = $from->copy();
+                    $end = $from->copy()->endOfWeek();
+                    $key = $year . '-' . str_pad($week, 2, '0', STR_PAD_LEFT);
+                    $label = sprintf('Tuần %d (%s - %s)', $week, $start->format('d/m'), $end->format('d/m'));
+
+                    $results[] = [
+                        'week' => $label,
+                        'revenue' => $rawResults[$key] ?? 0,
+                    ];
+
+                    $from->addWeek();
+                }
                 break;
 
             case 'month':
-                $results = $query->select(
+                $rawResults = $query->select(
                     DB::raw('YEAR(created_at) as year'),
                     DB::raw('MONTH(created_at) as month'),
                     DB::raw('SUM(total_price) as revenue')
                 )
                     ->groupBy('year', 'month')
-                    ->orderBy('year')
-                    ->orderBy('month')
                     ->get()
-                    ->map(function ($item) {
+                    ->mapWithKeys(function ($item) {
+                        $key = $item->year . '-' . str_pad($item->month, 2, '0', STR_PAD_LEFT);
                         return [
-                            'month' => sprintf('%02d/%d', $item->month, $item->year),
-                            'revenue' => (float) $item->revenue,
+                            $key => (float) $item->revenue,
                         ];
                     });
+
+                $results = [];
+                while ($from->lte($to)) {
+                    $year = $from->year;
+                    $month = $from->month;
+                    $key = $year . '-' . str_pad($month, 2, '0', STR_PAD_LEFT);
+                    $results[] = [
+                        'month' => sprintf('%02d/%d', $month, $year),
+                        'revenue' => $rawResults[$key] ?? 0,
+                    ];
+                    $from->addMonth();
+                }
                 break;
+
             case 'quarter':
-                $results = $query->select(
+                $rawResults = $query->select(
                     DB::raw('YEAR(created_at) as year'),
                     DB::raw('QUARTER(created_at) as quarter'),
                     DB::raw('SUM(total_price) as revenue')
                 )
                     ->groupBy('year', 'quarter')
-                    ->orderBy('year')
-                    ->orderBy('quarter')
                     ->get()
-                    ->map(function ($item) {
+                    ->mapWithKeys(function ($item) {
+                        $key = $item->year . '-Q' . $item->quarter;
                         return [
-                            'quarter' => 'Q' . $item->quarter . ' ' . $item->year,
-                            'revenue' => (float) $item->revenue,
+                            $key => (float) $item->revenue,
                         ];
                     });
+
+                $results = [];
+                while ($from->lte($to)) {
+                    $year = $from->year;
+                    $quarter = ceil($from->month / 3);
+                    $key = $year . '-Q' . $quarter;
+
+                    $results[] = [
+                        'quarter' => 'Q' . $quarter . ' ' . $year,
+                        'revenue' => $rawResults[$key] ?? 0,
+                    ];
+
+                    $from->addQuarter();
+                }
                 break;
+
             case 'year':
-                $results = $query->select(
+                $rawResults = $query->select(
                     DB::raw('YEAR(created_at) as year'),
                     DB::raw('SUM(total_price) as revenue')
                 )
                     ->groupBy('year')
-                    ->orderBy('year')
                     ->get()
-                    ->map(function ($item) {
-                        return [
-                            'year' => $item->year,
-                            'revenue' => (float) $item->revenue,
-                        ];
+                    ->mapWithKeys(function ($item) {
+                        return [$item->year => (float) $item->revenue];
                     });
+
+                $startYear = $from->year;
+                $endYear = $to->year;
+                $results = [];
+
+                for ($y = $startYear; $y <= $endYear; $y++) {
+                    $results[] = [
+                        'year' => $y,
+                        'revenue' => $rawResults[$y] ?? 0,
+                    ];
+                }
                 break;
 
             default:
                 return response()->json([
-                    'error' => 'Tham số group_by không hợp lệ. Giá trị hợp lệ: day, week, month, year'
+                    'error' => 'Tham số group_by không hợp lệ. Giá trị hợp lệ: weekday, day, week, month, quarter, year'
                 ], 400);
         }
 
         return response()->json($results);
     }
+
     // Số lượng khách hàng đã đặt hàng
     public function getCustomerCount()
     {

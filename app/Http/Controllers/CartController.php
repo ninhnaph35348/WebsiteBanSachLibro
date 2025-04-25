@@ -54,9 +54,15 @@ class CartController extends Controller
                     return response()->json(['message' => "Sản phẩm {$variant->product->title} không đủ hàng"], 400);
                 }
 
-                $price_product = $variant->promotion ?? $variant->price;
+                $price_product = ($variant->promotion !== null && $variant->promotion > 0)
+                    ? $variant->promotion
+                    : $variant->price;
                 $subtotal = $price_product * $item['quantity'];
                 $totalProductPrice += $subtotal;
+
+                // 👉 Trừ số lượng kho
+                $variant->quantity -= $item['quantity'];
+                $variant->save();
 
                 // 👉 Thêm dòng hard_products và hard_price_time ở đây
                 $orderDetails[] = [
@@ -216,13 +222,13 @@ class CartController extends Controller
                 return response()->json(['message' => 'Không có chi tiết đơn hàng để hủy!'], 400);
             }
 
-            // foreach ($orderDetails as $detail) {
-            //     $productVariant = $detail->productVariant;
-            //     if ($productVariant) {
-            //         $productVariant->quantity += $detail->quantity; // Cộng lại số lượng sản phẩm
-            //         $productVariant->save();
-            //     }
-            // }
+            foreach ($orderDetails as $detail) {
+                $productVariant = $detail->productVariant;
+                if ($productVariant) {
+                    $productVariant->quantity += $detail->quantity; // Cộng lại số lượng sản phẩm
+                    $productVariant->save();
+                }
+            }
 
             // Hoàn lại voucher nếu có
             if ($order->voucher_id) {

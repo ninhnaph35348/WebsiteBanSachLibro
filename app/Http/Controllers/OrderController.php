@@ -24,8 +24,6 @@ class OrderController extends Controller
         return OrderResource::collection($orders);
     }
 
-
-
     // Lấy thông tin 1 đơn hàng
     public function show($code_order)
     {
@@ -38,10 +36,7 @@ class OrderController extends Controller
         );
     }
 
-
     // Cập nhật đơn hàng
-
-
     public function update(Request $request, $code_order)
     {
         $order = Order::with('orderDetails')->where('code_order', $code_order)->first();
@@ -52,17 +47,14 @@ class OrderController extends Controller
         $newStatus = $request['order_status_id'];
         $currentStatus = $order->order_status_id;
 
-        // Không cho phép cập nhật nếu đơn hàng đã hoàn thành, hủy, hoặc từ chối
         if (in_array($currentStatus, [6, 7, 8])) {
             return response()->json(['message' => 'Không thể thay đổi trạng thái đơn hàng này'], 400);
         }
 
-        // Không được quay lùi trạng thái
         if ($newStatus < $currentStatus) {
             return response()->json(['message' => 'Không thể thay đổi về trạng thái trước đó'], 400);
         }
 
-        // Trường hợp hủy đơn
         if ($newStatus == 7) {
             if ($currentStatus < 3) {
                 // Cho phép hủy đơn
@@ -70,7 +62,6 @@ class OrderController extends Controller
                 return response()->json(['message' => 'Không thể hủy nếu đơn hàng đã đang chuẩn bị hàng trở lên'], 400);
             }
         } else {
-            // Nếu không phải hủy đơn thì phải cập nhật tuần tự từng bước
             if ($newStatus != $currentStatus + 1) {
                 return response()->json(['message' => 'Vui lòng cập nhật trạng thái theo thứ tự từng bước'], 400);
             }
@@ -78,33 +69,11 @@ class OrderController extends Controller
 
         DB::beginTransaction();
         try {
-            // Nếu chuyển sang trạng thái 6 (Đã giao hàng), trừ kho
-            if ($newStatus == 6) {
-                foreach ($order->orderDetails as $detail) {
-                    $variant = ProductVariant::find($detail->product_variant_id);
-
-                    if (!$variant) {
-                        DB::rollBack();
-                        return response()->json(['message' => 'Không tìm thấy biến thể sản phẩm'], 404);
-                    }
-
-                    if ($variant->quantity < $detail->quantity) {
-                        DB::rollBack();
-                        return response()->json([
-                            'message' => "Sản phẩm {$variant->product->title} không đủ hàng trong kho."
-                        ], 400);
-                    }
-
-                    $variant->decrement('quantity', $detail->quantity);
-                }
-            }
-
-            // Cập nhật trạng thái đơn hàng
+            // ✅ Cập nhật trạng thái đơn hàng
             $order->update(['order_status_id' => $newStatus]);
 
             DB::commit();
 
-            // Lấy tên trạng thái đơn hàng
             $orderStatus = DB::table('order_statuses')->where('id', $newStatus)->value('name');
 
             return response()->json([

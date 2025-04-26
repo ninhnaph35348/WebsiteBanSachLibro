@@ -23,6 +23,8 @@ class AdminOrderResource extends JsonResource
             'shipping_email' => $this->shipping_email,
             'shipping_phone' => $this->shipping_phone,
             'shipping_address' => $this->shipping_address,
+            'voucher_discount' => $this->voucher ? $this->voucher->discount : null,
+            'voucher_discount_type' => $this->voucher ? $this->voucher->discount_type : null,
             'status' => $this->status ? $this->status->name : null,
             'voucher' => $this->voucher ? $this->voucher->code : null,
             'user' => $this->user ? $this->user->username : null,

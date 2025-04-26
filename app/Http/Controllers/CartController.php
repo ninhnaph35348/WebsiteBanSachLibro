@@ -48,7 +48,23 @@ class CartController extends Controller
             $orderDetails = [];
 
             foreach ($request->cart as $item) {
-                $variant = ProductVariant::findOrFail($item['product_variant_id']);
+                $variant = ProductVariant::where('id', $item['product_variant_id'])
+                    ->where('del_flg', 0)
+                    ->whereHas('product', function ($query) {
+                        $query->where('status', 'in_stock');
+                    })
+                    ->first();
+
+                if (!$variant) {
+                    $productTitle = ProductVariant::with('product')
+                        ->find($item['product_variant_id'])
+                        ?->product
+                        ?->title ?? 'Sản phẩm này';
+
+                    return response()->json([
+                        'message' => "Rất tiếc, {$productTitle} hiện không còn bán nữa."
+                    ], 400);
+                }
 
                 if ($variant->quantity < $item['quantity']) {
                     return response()->json(['message' => "Sản phẩm {$variant->product->title} không đủ hàng"], 400);
@@ -76,8 +92,13 @@ class CartController extends Controller
 
             // Phí vận chuyển (nếu không có thì mặc định = 0)
             $shippingFee = $request->shipping_fee ?? 0;
+            
             $user = auth('api')->user();
-
+            if ($user->status !== 'active') { 
+                return response()->json([
+                    'message' => 'Tài khoản của bạn đã bị khóa, không thể thực hiện mua hàng.'
+                ], 403);
+            }
             // Áp dụng voucher (nếu có)
             $discount = 0;
             $voucherId = null;

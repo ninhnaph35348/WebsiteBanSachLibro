@@ -2,7 +2,6 @@
 
 use App\Http\Controllers\Mails\MailController;
 use App\Mail\OrderMail;
-use App\Mail\OrderShipped;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Route;
 
@@ -20,16 +19,7 @@ use Illuminate\Support\Facades\Route;
 Route::get('/', function () {
     return view('welcome');
 });
-Route::get('/test-mail', function () {
-    $order = (object)[
-        'id' => 1234,
-        'total' => 999000,
-        'user' => (object)['email' => 'youremail@example.com'] // thay bằng email Chủ Nhân
-    ];
 
-    Mail::to($order->user->email)->send(new OrderMail($order));
-
-    return 'Mail đã được gửi thành công cho Chủ Nhân!';
-});
 Route::get('/orders/{code_order}', [MailController::class, 'show'])->name('orders.show');
-
+Route::get('/orders/cancel/{code_order}', [MailController::class, 'cancelFromEmail'])->name('orders.cancel');
+Route::middleware('optional-auth')->post('/orders/cancel/{order_code}', [MailController::class, 'cancelOrder']);

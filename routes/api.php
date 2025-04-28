@@ -57,7 +57,8 @@ Route::middleware('auth:sanctum')->put('/me', [UserController::class, 'updateMe'
 Route::middleware('auth:sanctum')->get('/me', function (Request $request) {
     return response()->json(['user' => $request->user()]);
 });
-
+// Quên mật khẩu
+Route::post('forgot-password', [AuthController::class, 'sendResetLink']);
 // Routes cho Super Admin (Toàn quyền, bao gồm quản lý users)
 Route::middleware(['auth:sanctum',  'role:s.admin'])->group(function () {
     Route::prefix('users')->group(function () {

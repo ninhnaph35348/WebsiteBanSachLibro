@@ -7,6 +7,7 @@ use Illuminate\Support\Facades\Hash;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Password;
 use Illuminate\Support\Facades\Validator;
 //
 class AuthController extends Controller
@@ -226,8 +227,44 @@ class AuthController extends Controller
         return response()->json(['message' => 'Đổi mật khẩu thành công'], 200);
     }
 
+    public function sendResetLink(Request $request)
+    {
+        // Validate email
+        $validator = Validator::make($request->all(), [
+            'email' => 'required|email|exists:users,email',
+        ]);
 
+        if ($validator->fails()) {
+            return response()->json([
+                'status' => 'error',
+                'message' => 'Email không hợp lệ hoặc không tồn tại',
+                'errors' => $validator->errors(),
+            ], 422);
+        }
 
+        // Gửi link reset mật khẩu
+        $response = Password::sendResetLink(
+            $request->only('email')
+        );
+
+        switch ($response) {
+            case Password::RESET_LINK_SENT:
+                return response()->json(['status' => 'success', 'message' => 'Đã gửi link reset mật khẩu vào email của bạn.']);
+            case Password::INVALID_USER:
+                return response()->json(['status' => 'error', 'message' => 'Email không tồn tại trong hệ thống.'], 404);
+            default:
+                return response()->json(['status' => 'error', 'message' => 'Không thể gửi link reset mật khẩu. Vui lòng thử lại.'], 500);
+        }
+    }
+
+    public function showResetForm(Request $request, $token = null)
+    {
+        // truyền token và email (nếu có) cho view
+        return view('auth.reset-password', [
+            'token' => $token,
+            'email' => $request->query('email'),
+        ]);
+    }
 
     // Đăng xuất
     public function logout(Request $request)

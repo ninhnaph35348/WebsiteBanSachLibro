@@ -3,6 +3,8 @@
 namespace App\Models;
 
 // use Illuminate\Contracts\Auth\MustVerifyEmail;
+
+use App\Notifications\CustomResetPasswordNotification;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
@@ -71,5 +73,10 @@ class User extends Authenticatable
         return $this->belongsToMany(Voucher::class, 'voucher_user', 'user_id', 'voucher_id')
             ->withPivot('used_at', 'status') // truy xuất thêm các trường trong bảng trung gian
             ->withTimestamps(); // Lưu lại thời gian created_at và updated_at
+    }
+
+    public function sendPasswordResetNotification($token)
+    {
+        $this->notify(new CustomResetPasswordNotification($token)); // Sử dụng thông báo tùy chỉnh
     }
 }

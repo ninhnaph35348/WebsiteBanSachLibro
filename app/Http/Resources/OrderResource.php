@@ -36,7 +36,7 @@ class OrderResource extends JsonResource
     {
         return match ($this->payment_method) {
             0 => 'COD',
-            1 => 'Ví Momo',
+            1 => 'VNPay',
             default => 'Không xác định',
         };
     }

@@ -72,15 +72,35 @@
         </table>
     </div>
 
-    @if ($order->voucher)
-        <div style="background: #fff; padding: 20px; border-radius: 8px; margin-bottom: 20px; box-shadow: 0 2px 8px rgba(0,0,0,0.05);">
-            <p><strong>🎁 Voucher áp dụng:</strong> {{ $order->voucher->code }}</p>
-        </div>
-    @endif
 
-    <div style="background: #fff; padding: 20px; border-radius: 8px; margin-bottom: 20px; box-shadow: 0 2px 8px rgba(0,0,0,0.05);">
-        <p style="font-size: 18px; color: #d32f2f; margin: 0;"><strong>💰 Tổng cộng:</strong> {{ number_format($order->total_price) }} đ</p>
-    </div>
+        <div style="background: #fff; padding: 20px; border-radius: 8px; margin-bottom: 20px; box-shadow: 0 2px 8px rgba(0,0,0,0.05);">
+            <p><strong>🎁 Voucher áp dụng:</strong> {{ $order->voucher->code ?? 'Không có'}}</p>
+        </div>
+
+        <div style="background: #fff; padding: 20px; border-radius: 8px; margin-bottom: 20px; box-shadow: 0 2px 8px rgba(0,0,0,0.05);">
+            <div style="margin-bottom: 15px;">
+                <p style="font-size: 18px; color: #1e88e5; margin: 0;">
+                    <strong>💸 Giảm giá:</strong>
+                    @if ($order->voucher->discount_type == 'percent')
+                        {{ number_format($order->voucher->discount) }}%
+                    @else
+                        {{ number_format($order->voucher->discount) }} đ
+                    @endif
+                </p>
+            </div>
+
+            <div style="margin-bottom: 15px;">
+                <p style="font-size: 18px; color: #1e88e5; margin: 0;">
+                    <strong>🚚 Phí vận chuyển:</strong> {{ number_format(30000) }} đ
+                </p>
+            </div>
+
+            <div>
+                <p style="font-size: 18px; color: #d32f2f; margin: 0;">
+                    <strong>💰 Tổng cộng:</strong> {{ number_format($order->total_price) }} đ
+                </p>
+            </div>
+        </div>
 
     @if (session('success'))
     <div style="background-color: #c8e6c9; color: #256029; padding: 15px; border-radius: 8px; margin-bottom: 20px; text-align: center; font-size: 16px; font-weight: bold;">

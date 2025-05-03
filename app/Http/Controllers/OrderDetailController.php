@@ -40,7 +40,8 @@ class OrderDetailController extends Controller
 
         // Tính tổng tiền sản phẩm (chưa gồm mã giảm giá, phí vận chuyển)
         $totalProductPrice = $order->orderDetails->sum(function ($detail) {
-            $price = $detail->productVariant->promotion ?? $detail->productVariant->price;
+            $variant = $detail->productVariant;
+            $price = ($variant->promotion > 0) ? $variant->promotion : $variant->price;
             return $price * $detail->quantity;
         });
 

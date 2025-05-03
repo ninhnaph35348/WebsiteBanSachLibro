@@ -92,9 +92,9 @@ class CartController extends Controller
 
             // Phí vận chuyển (nếu không có thì mặc định = 0)
             $shippingFee = $request->shipping_fee ?? 0;
-            
+
             $user = auth('api')->user();
-            if ($user->status !== 'active') { 
+            if ($user->status !== 'active') {
                 return response()->json([
                     'message' => 'Tài khoản của bạn đã bị khóa, không thể thực hiện mua hàng.'
                 ], 403);
@@ -115,7 +115,7 @@ class CartController extends Controller
             }
 
             // Tính tổng tiền sau khi áp dụng giảm giá
-            $totalPrice = max(0, $totalProductPrice + $shippingFee - $discount);
+            $totalPrice = max(0, ($totalProductPrice - $discount) + $shippingFee);
 
 
             // Nếu đã đăng nhập, lấy thông tin user từ hệ thống, nếu không thì lấy từ request
@@ -339,9 +339,11 @@ class CartController extends Controller
             throw new \Exception('Đơn hàng chưa đủ điều kiện áp dụng voucher.');
         }
 
+        // Tính toán giảm giá
         $discount = 0;
         if ($voucher->discount_type === 'percent') {
             $discount = $totalProductPrice * ($voucher->discount / 100);
+            // Áp dụng max_discount nếu có
             if ($voucher->max_discount) {
                 $discount = min($discount, $voucher->max_discount);
             }

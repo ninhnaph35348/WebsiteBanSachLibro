@@ -59,6 +59,18 @@ class ReviewController extends Controller
                 return response()->json(['message' => 'Không tìm thấy sản phẩm'], 404);
             }
 
+            // Kiểm tra người dùng đã đánh giá sản phẩm này chưa
+            $existingReview = Review::where('product_id', $product->id)
+                ->where('user_id', Auth::id())
+                ->first();
+
+            if ($existingReview) {
+                return response()->json([
+                    'message' => 'Bạn đã đánh giá sản phẩm này rồi.'
+                ], 409);
+            }
+
+            // Tạo đánh giá mới
             $review = Review::create([
                 'rating' => $request->rating,
                 'review' => $request->review,

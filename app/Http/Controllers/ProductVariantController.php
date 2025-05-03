@@ -57,12 +57,23 @@ class ProductVariantController extends Controller
     public function store(Request $request)
     {
         $request->validate([
-            'product_id' => 'required',
-            'cover_id' => 'required',
+            'product_id' => 'required|exists:products,id',
+            'cover_id' => 'required|exists:covers,id',
             'quantity' => 'required|integer|min:0',
-            'price' => 'required|min:0',
-            'promotion' => 'nullable|min:0',
+            'price' => 'required|numeric|min:0',
+            'promotion' => 'nullable|numeric|min:0',
         ]);
+
+        // Kiểm tra xem biến thể này đã tồn tại chưa
+        $exists = ProductVariant::where('product_id', $request->product_id)
+            ->where('cover_id', $request->cover_id)
+            ->exists();
+
+        if ($exists) {
+            return response()->json([
+                'message' => 'Sản phẩm này đã có biến thể với loại bìa này!'
+            ], 422);
+        }
 
         $variant = ProductVariant::create($request->all());
 
@@ -110,7 +121,7 @@ class ProductVariantController extends Controller
      */
     public function update(Request $request, string $code, int $cover_id)
     {
-        // Lấy biến thể theo code sản phẩm và cover_id
+        // Lấy biến thể hiện tại theo mã sản phẩm và cover_id
         $variant = ProductVariant::with('product')
             ->whereHas('product', function ($query) use ($code): void {
                 $query->where('code', $code);
@@ -130,6 +141,21 @@ class ProductVariantController extends Controller
             'price' => 'required|numeric|min:0',
             'promotion' => 'nullable|numeric|min:0',
         ]);
+
+        // Lấy product_id từ biến thể hiện tại
+        $productId = $variant->product_id;
+
+        // Kiểm tra nếu cover_id mới bị trùng với một bản ghi khác
+        $isDuplicate = ProductVariant::where('product_id', $productId)
+            ->where('cover_id', $request->cover_id)
+            ->where('id', '!=', $variant->id)
+            ->exists();
+
+        if ($isDuplicate) {
+            return response()->json([
+                'message' => 'Sản phẩm đã có một biến thể với loại bìa này!'
+            ], 422);
+        }
 
         $variant->update($request->only(['cover_id', 'quantity', 'price', 'promotion']));
 

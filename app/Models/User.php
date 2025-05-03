@@ -77,6 +77,6 @@ class User extends Authenticatable
 
     public function sendPasswordResetNotification($token)
     {
-        $this->notify(new CustomResetPasswordNotification($token)); // Sử dụng thông báo tùy chỉnh
+        $this->notify(new CustomResetPasswordNotification($token));
     }
 }

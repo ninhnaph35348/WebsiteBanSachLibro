@@ -47,7 +47,7 @@
                 <form action="{{ url('password/reset') }}" method="POST">
                     @csrf
                     <input type="hidden" name="token" value="{{ $token }}">
-                    <input type="hidden" name="email" value="{{ $email }}">
+                    <input type="hidden" name="email" value="{{ $email ?? old('email') }}">
 
                     {{-- Mật khẩu mới --}}
                     <div class="form-floating mb-3">

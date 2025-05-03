@@ -19,7 +19,7 @@ use Illuminate\Support\Facades\Route;
 */
 
 Route::get('/', function () {
-    return view('welcome');
+     return view('welcome');
 });
 
 Route::get('/orders/{code_order}', [MailController::class, 'show'])->name('orders.show');
@@ -33,3 +33,5 @@ Route::get('password/reset/{token}', [ResetPasswordController::class, 'showReset
 // Xử lý form đặt lại mật khẩu
 Route::post('password/reset', [ResetPasswordController::class, 'reset'])
      ->name('password.update');
+Route::post('password/email', [ResetPasswordController::class, 'sendResetLinkEmail'])
+     ->name('password.email');

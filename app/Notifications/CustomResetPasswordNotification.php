@@ -15,14 +15,15 @@ class CustomResetPasswordNotification extends ResetPasswordNotification
      */
     public function toMail($notifiable)
     {
+        $resetUrl = url(route('password.reset', [
+            'token' => $this->token,
+            'email' => $notifiable->getEmailForPasswordReset(), // 👈 thêm email vào
+        ], false));
+
         return (new MailMessage)
-            ->subject('Yêu cầu thay đổi mật khẩu') // Chủ đề email
-            ->greeting('Xin chào!') // Lời chào
-            ->line('Chúng tôi đã nhận được yêu cầu thay đổi mật khẩu cho tài khoản của bạn.')
-            ->line('Nhấp vào nút dưới đây để đặt lại mật khẩu của bạn.')
-            ->action('Đặt lại mật khẩu', url('password/reset', $this->token)) // Link reset mật khẩu
-            ->line('Đường dẫn này sẽ hết hạn trong 60 phút.')
-            ->line('Nếu bạn không yêu cầu thay đổi mật khẩu, không cần thực hiện thêm hành động nào.')
-            ->salutation('Trân trọng, Libro'); // Lời chào cuối
+            ->subject('Đặt lại mật khẩu')
+            ->line('Bạn nhận được email này vì chúng tôi nhận được yêu cầu đặt lại mật khẩu.')
+            ->action('Đặt lại mật khẩu', $resetUrl)
+            ->line('Nếu bạn không yêu cầu đặt lại mật khẩu, hãy bỏ qua email này.');
     }
 }

@@ -87,6 +87,7 @@ class CartController extends Controller
                     'total_line' => $subtotal,
                     'hard_products' => $variant->product->title, // tên sản phẩm cứng
                     'hard_price_time' => $price_product, // giá tại thời điểm thanh toán
+                    'hard_cover' => $variant->cover->type, // giá gốc
                 ];
             }
 

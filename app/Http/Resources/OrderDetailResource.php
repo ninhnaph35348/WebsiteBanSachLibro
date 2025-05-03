@@ -11,7 +11,7 @@ class OrderDetailResource extends JsonResource
     {
         return [
             'id' => $this->id,
-            'cover' => $this->productVariant->cover ? $this->productVariant->cover->type : null,
+            'cover' => $this->hard_cover,
             'code' => $this->productVariant->product->code,
             'title' => $this->hard_products,
             'price_product' => $this->hard_price_time,

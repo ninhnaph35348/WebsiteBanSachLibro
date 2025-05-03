@@ -11,7 +11,7 @@ class AdminOrderDetailResource extends JsonResource
     {
         return [
             'id' => $this->id,
-            'cover' => $this->productVariant->cover ? $this->productVariant->cover->type : null,
+            'cover' => $this->hard_cover,
             'code' => $this->productVariant->product->code,
             'title' => $this->hard_products,
             'image' => $this->productVariant->product->image,

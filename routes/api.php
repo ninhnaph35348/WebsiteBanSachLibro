@@ -20,6 +20,7 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\OrderController;
 use App\Http\Controllers\OrderDetailController;
 use App\Http\Controllers\OrderStatusController;
+use App\Http\Controllers\PostController;
 use App\Http\Controllers\VnPayController;
 use App\Models\User;
 
@@ -113,6 +114,13 @@ Route::middleware(['auth:sanctum',  'role:s.admin|admin'])->group(function () {
         Route::put('/edit/{id}', [GenreController::class, 'update']);
         Route::put('/{id}', [GenreController::class, 'destroy']);
     });
+    Route::prefix('posts')->group(function () {
+        Route::get('/', [PostController::class, 'index']);
+        Route::get('/{id}', [PostController::class, 'show']);
+        Route::post('/', [PostController::class, 'store']);
+        Route::put('/edit/{id}', [PostController::class, 'update']);
+        Route::put('/{id}', [PostController::class, 'destroy']);
+    });
     Route::prefix('products')->group(function () {
         Route::get('/', [ProductController::class, 'index']);
         Route::get('/search', [ProductController::class, 'search']);
@@ -156,7 +164,7 @@ Route::middleware(['auth:sanctum',  'role:s.admin|admin'])->group(function () {
 });
 // Get All
 Route::get('vouchers/', [VoucherController::class, 'index']);
-
+Route::get('posts/', [PostController::class, 'index']);
 Route::get('users/', [UserController::class, 'index']);
 Route::get('categories/', [CategoryController::class, 'index']);
 Route::get('covers/', [CoverController::class, 'index']);
@@ -170,6 +178,7 @@ Route::get('orders/', [OrderController::class, 'index']);
 Route::get('/review-products/{productCode}', [ReviewController::class, 'getReviewByProductId']);
 Route::get('product_variants_toprate/', [ProductVariantController::class, 'getTop5ProductVarriantByRating']);
 // Get Detail
+Route::get('posts/{id}', [PostController::class, 'show']);
 Route::get('vouchers/{id}', [VoucherController::class, 'show']);
 Route::get('users/{id}', [UserController::class, 'show']);
 Route::get('categories/{id}', [CategoryController::class, 'show']);

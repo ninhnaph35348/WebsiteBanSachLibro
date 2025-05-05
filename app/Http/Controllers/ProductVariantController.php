@@ -164,23 +164,23 @@ class ProductVariantController extends Controller
             'variant' => $variant
         ]);
     }
-    public function updateProductVariantStatus(Request $request, $code)
+    public function updateProductVariantStatus(Request $request, $code, $id)
     {
-        $product = Product::where('code', $code)->with('variants')->first();
+        $product = Product::where('code', $code)->first();
         if (!$product) {
             return response()->json(['message' => 'Không tìm thấy sản phẩm'], 404);
         }
 
-        $variant = $product->variants->first();
+        $variant = $product->variants()->where('id', $id)->first();
         if (!$variant) {
-            return response()->json(['message' => 'Không tìm thấy biến thể sản phẩm'], 404);
+            return response()->json(['message' => 'Không tìm thấy biến thể sản phẩm với ID đã cung cấp'], 404);
         }
 
         $validated = $request->validate([
             'del_flg' => 'required|in:0,1',
         ]);
 
-        // Nếu product đã ẩn (status = out_stock) và request muốn hiển thị lại biến thể (del_flg = 0)
+        // Nếu sản phẩm đã ẩn (status = out_stock) và biến thể được yêu cầu hiển thị lại
         if ($product->status === 'out_stock' && $validated['del_flg'] == 0) {
             return response()->json([
                 'message' => 'Không thể hiển thị biến thể vì sản phẩm đang bị ẩn'
